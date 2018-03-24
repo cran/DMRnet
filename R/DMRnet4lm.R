@@ -94,8 +94,7 @@ DMRnet4lm <- function(X, y, clust.method = "complete", o = 5, nlambda = 20, maxp
                   ind1[ord] = (p - length(ord) + 1):p
                   be = be[ind1,]
    }
-   cl <- match.call()
-   fit <- list(beta = be, df = length(idx):1, rss = rss[cbind(idx, ind[idx])], n = n, call = cl, interc = TRUE)
+   fit <- list(beta = be, df = length(idx):1, rss = rss[cbind(idx, ind[idx])], n = n, arguments = list(family = "gaussian", clust.method = clust.method, o = o, nlambda = nlambda, maxp = maxp), interc = TRUE)
    class(fit) = "DMR"
    return(fit)
 }

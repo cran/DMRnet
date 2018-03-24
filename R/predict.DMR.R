@@ -28,11 +28,11 @@ predict.DMR <- function(object, newx, df = NULL, type = "link", ...){
          if(is.null(ncol(newx))){
                                  stop("Error: newx should be a data frame")
          }
-         dd <- data.frame(newx, u = stats::rnorm(nrow(newx)))
+         dd <- data.frame(newx)
          if (object$interc == TRUE){
-            Z <- stats::model.matrix(u ~ ., data = dd)
+            Z <- stats::model.matrix( ~ ., data = dd)
          } else{
-            Z <- stats::model.matrix(u ~ .-1, data = dd)
+            Z <- stats::model.matrix( ~ .-1, data = dd)
          }
          if(ncol(Z) != nrow(object$beta) | is.null(ncol(newx))){
                     stop(paste("Error: non-conforming arrays, newx should be a data frame with ncol equal to", nrow(object$beta)))

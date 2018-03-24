@@ -175,8 +175,7 @@ DMR4glm <- function(X, y, clust.method = 'complete', lam = 10^(-7)){
                   ind[ord] = (p - length(ord) + 1):p
                   b = b[ind,]
    }
-   cl <- match.call()
-   fit <- list(beta = b, df = p:1, loglik = loglik, n = n, call = cl, interc = TRUE)
+   fit <- list(beta = b, df = p:1, loglik = loglik, n = n, arguments = list(family = "binomial", clust.method = clust.method, lam = lam), interc = TRUE)
    class(fit) = "DMR"
    return(fit)
 }

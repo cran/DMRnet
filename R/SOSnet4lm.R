@@ -76,8 +76,7 @@ SOSnet4lm <- function(X, y, o = 5, nlambda = 50, interc = TRUE, maxp = ceiling(l
             mnk <- stats::lm.fit(as.matrix(rep(1, n)), y)
             be <- cbind(be, c(mnk$coef, rep(0, ncol(X))))
           }
-          cl <- match.call()
-          fit <- list(beta = be, df = length(idx):1, rss = rss[cbind(idx, iid[idx])], n = n, call = cl, interc = interc)
+          fit <- list(beta = be, df = length(idx):1, rss = rss[cbind(idx, iid[idx])], n = n, arguments = list(family = "gaussian", nlambda = nlambda, interc = interc, maxp = maxp), interc = interc)
           class(fit) = "DMR"
           return(fit)
 }

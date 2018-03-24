@@ -53,7 +53,7 @@ DMR4lm <- function(X, y, clust.method = 'complete'){
     rX <- qr.R(m$qr)
     Ro <- solve(rX)
     z <- t(qX)%*%y
-    sigma <- (t(m$res)%*%m$res)/(n - p)
+    sigma <- as.numeric((t(m$res)%*%m$res)/(n - p))
     #dissimilarity measures - matrices of squared t-statistics for each factor
     if (n.factors > 0){
        Tmats <- lapply(1:n.factors, function(i) {
@@ -158,8 +158,7 @@ DMR4lm <- function(X, y, clust.method = 'complete'){
                   ind[ord] = (p - length(ord) + 1):p
                   b = b[ind,]
    }
-   cl <- match.call()
-   fit <- list(beta = b, df = p:1, rss = rss, n = n, call = cl, interc = TRUE)
+   fit <- list(beta = b, df = p:1, rss = rss, n = n, arguments = list(family = "binomial", clust.method = clust.method), interc = TRUE)
    class(fit) = "DMR"
    return(fit)
 }

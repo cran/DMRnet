@@ -22,7 +22,7 @@ DMR4lm_help <- function(X, y, clust.method = 'complete'){
     rX <- qr.R(m$qr)
     Ro <- solve(rX)
     z <- t(qX)%*%y
-    sigma <- (t(m$res)%*%m$res)/(n - p)
+    sigma <- as.numeric((t(m$res)%*%m$res)/(n - p))
     #dissimilarity measures - matrices of squared t-statistics for each factor
     if (n.factors > 0){
        Tmats <- lapply(1:n.factors, function(i) {

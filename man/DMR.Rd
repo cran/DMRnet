@@ -24,7 +24,7 @@ An object with S3 class "DMR", which  is  a  list  with  the  ingredients:
 \item{df}{Vector of degrees of freedom; from p to 1.}
 \item{rss/loglik}{Measure of fit for the nested models: rss (residual sum of squares) for family="gaussian" and loglik (loglikelihood) for family="binomial"}
 \item{n}{Number of observations.}
-\item{call}{The call that produced this object.}
+\item{arguments}{List of the chosen arguments from the function call.}
 \item{interc}{If the intercept was fitted: for DMR always equal to TRUE.}
 }
 \description{

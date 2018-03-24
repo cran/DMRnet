@@ -74,8 +74,7 @@ SOSnet4glm <- function(X, y, o = 5, nlambda = 20, lam = 10^(-7), interc = TRUE, 
           loglik = sapply(idx, function(i) {
              return(loglik = unlist(mm[[iid[i]]]$loglikbe[1, i]))
           })
-          cl <- match.call()
-          fit <- list(beta = be, df = length(idx):1, loglik = loglik, n = n, call = cl,  interc = interc)
+          fit <- list(beta = be, df = length(idx):1, loglik = loglik, n = n, arguments = list(family = "binomial", o = o, nlambda = nlambda, lam = lam, interc = interc, maxp = maxp),  interc = interc)
           class(fit) = "DMR"
           return(fit)
 }

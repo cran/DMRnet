@@ -18,7 +18,9 @@
 #' print(m)
 #' @export
 print.DMR <- function (x,...){
-    cat("\nCall: ", deparse(x$call), "\n\n")
+    cat("\nArguments: ", "\n")
+    print(x$arguments)
+    cat("Family of models: ", "\n")
     if (names(x)[3] == "rss"){
        print(cbind(Df = x$df, RSS = x$rss))
     } else {

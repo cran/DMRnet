@@ -102,8 +102,7 @@ DMRnet4glm <- function(X, y, clust.method = "complete", o = 5, nlambda = 20, lam
                   ind1[ord] = (p - length(ord) + 1):p
                   be = be[ind1,]
    }
-   cl <- match.call()
-   fit <- list(beta = be, df = length(idx):1, loglik = loglik[cbind(idx, ind[idx])], n = n, call = cl, interc = TRUE)
+   fit <- list(beta = be, df = length(idx):1, loglik = loglik[cbind(idx, ind[idx])], n = n, arguments = list(family = "binomial", clust.method = clust.method, o = o, nlambda = nlambda, lam = lam, maxp = maxp), interc = TRUE)
    class(fit) = "DMR"
    return(fit)
 }

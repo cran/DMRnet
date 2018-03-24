@@ -73,7 +73,9 @@
 
 DMRnet <- function(X, y, family = "gaussian", clust.method = "complete", o = 5, nlambda = 20, lam = 10^(-7), interc = TRUE, maxp = ifelse(family == "gaussian", ceiling(length(y)/2), ceiling(length(y)/4))){
     X <- data.frame(X, check.names = TRUE, stringsAsFactors = TRUE)
-    sumnonfac <- sum(sapply(1:ncol(X),function(i) class(X[,i])) == "factor")
+    typeofcols <- sapply(1:ncol(X),function(i) class(X[,i]))
+    if(sum(unlist(typeofcols) == "ordered") > 0) stop("Error: there is an ordered factor in the data frame, change it to factor")
+    sumnonfac <- sum(typeofcols == "factor")
     if (family == "gaussian"){
        if(sumnonfac == 0){
                        return(SOSnet4lm(X, y, o = o, nlambda = nlambda, interc = interc, maxp = maxp))

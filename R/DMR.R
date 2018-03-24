@@ -30,7 +30,7 @@
 #' \item{df}{Vector of degrees of freedom; from p to 1.}
 #' \item{rss/loglik}{Measure of fit for the nested models: rss (residual sum of squares) for family="gaussian" and loglik (loglikelihood) for family="binomial"}
 #' \item{n}{Number of observations.}
-#' \item{call}{The call that produced this object.}
+#' \item{arguments}{List of the chosen arguments from the function call.}
 #' \item{interc}{If the intercept was fitted: for DMR always equal to TRUE.}
 #'
 #'
@@ -68,6 +68,8 @@
 
 DMR <- function(X, y, family = "gaussian", clust.method = 'complete', lam = 10^(-7)){
     X <- data.frame(X, check.names = TRUE, stringsAsFactors = TRUE)
+    typeofcols <- sapply(1:ncol(X),function(i) class(X[,i]))
+    if(sum(unlist(typeofcols) == "ordered") > 0) stop("Error: there is an ordered factor in the data frame, change it to factor")
     if (family == "gaussian"){
        return(DMR4lm(X, y, clust.method = clust.method))
     } else{
