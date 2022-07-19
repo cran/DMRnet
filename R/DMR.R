@@ -1,18 +1,20 @@
 #' @title Delete or Merge Regressors
 #'
-#' @description Fit a path of linear (family = "gaussian") or logistic (family = "binomial") regression models, where the number of parameters changes from 1 to p (p is the number of columns in the model matrix). Models are subsets of continuous predictors and partitions of levels of factors in X.
+#' @description Fit a path of linear (\code{family="gaussian"}) or logistic (\code{family="binomial"}) regression models, where the number of parameters changes from 1 to p (p is the number of columns in the model matrix). Models are subsets of continuous predictors and partitions of levels of factors in \code{X}.
 #'
 #' @param X Input data frame; each row is an observation vector; each column can be numerical or integer for a continuous predictor or a factor for a categorical predictor; DMR works only if p<n (n is the number of observations, p the number of columns in the model matrix), for p>=n see \code{\link{DMRnet}}.
 #'
-#' @param y Response variable; Numerical for family="gaussian" or a factor with two levels for family="binomial". For family="binomial" the last level in alphabetical order is the target class.
+#' @param y Response variable; Numerical for \code{family="gaussian"} or a factor with two levels for \code{family="binomial"}. For \code{family="binomial"} the last level in alphabetical order is the target class.
 #'
-#' @param family Response type; one of: "gaussian", "binomial".
+#' @param family Response type; one of: \code{"gaussian"}, \code{"binomial"}.
 #'
-#' @param clust.method Clustering method used for partitioning levels of factors; see function \href{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/hclust.html}{hclust} in package \pkg{stats} for details.
+#' @param clust.method Clustering method used for partitioning levels of factors; see function \href{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/hclust.html}{hclust} in package \pkg{stats} for details. \code{clust.method="complete"} is the default.
 #'
-#' @param lam Value of parameter lambda controling the amount of penalization in rigde regression. Used only for logistic regression in order to allow for parameter estimation in linearly separable setups. Used only for numerical reasons.
+#' @param lam The amount of penalization in ridge regression (used for logistic regression in order to allow for parameter estimation in linearly separable setups) or the amount of matrix regularization in case of linear regression. Used only for numerical reasons. The default is 1e-7.
 #'
-#' @details DMR algorithm is based on a traditional stepwise method.
+#' @param lambda The net of lambda values. It is optional and serves only for consistency with \code{DMRnet}. It is not used in \code{DMR}.
+#'
+#' @details \code{DMR} algorithm is based on a traditional stepwise method.
 #' A nested family of models is built based on the values of squared Wald statistics:
 #'
 #'  1. For each continuous variable the squared Wald statistic is calculated for a hypothesis that the variable is equal to zero (it should be deleted).
@@ -20,18 +22,20 @@
 #' 2. For each factor a dissimilarity matrix is constructed using squared Wald statistics for hypotheses that two parameters are equal
 #' (the two levels of factor should be merged). Next, hierarchical clustering is preformed using the dissimilarity matrix. All cutting heights are recorded.
 #'
-#' 3. Squared Wald statistics and cutting heights and values of  from steps 2 and 3 are concatenated and sorted, giving vector h.
+#' 3. Squared Wald statistics and cutting heights and values of  from steps 2 and 3 are concatenated and sorted, resulting in vector h.
 #'
 #' 4. Nested family of models of size 1 to p is built by accepting hypotheses according to increasing values in vector h.
 #'
-#' @return An object with S3 class "DMR", which  is  a  list  with  the  ingredients:
+#' @return An object with S3 class \code{"DMR"}, which  is  a  list  with  the  ingredients:
 #'
-#' \item{beta}{Matrix p times p of estimated paramters; each column corresponds to a model on the nested path having from p to 1 parameter (denoted as df).}
+#' \item{beta}{Matrix p times p of estimated parameters; each column corresponds to a model on the nested path having from p to 1 parameter (denoted as df).}
 #' \item{df}{Vector of degrees of freedom; from p to 1.}
-#' \item{rss/loglik}{Measure of fit for the nested models: rss (residual sum of squares) for family="gaussian" and loglik (loglikelihood) for family="binomial"}
+#' \item{rss/loglik}{Measure of fit for the nested models: rss (residual sum of squares) is returned for \code{family="gaussian"} and loglik (loglikelihood) is returned for \code{family="binomial"}.}
 #' \item{n}{Number of observations.}
+#' \item{levels.listed}{Minimal set of levels of respective factors present in data.}
+#' \item{lambda}{The net of lambda values used in the screening step, empty vector in case of \code{DMR}.}
 #' \item{arguments}{List of the chosen arguments from the function call.}
-#' \item{interc}{If the intercept was fitted: for DMR always equal to TRUE.}
+#' \item{interc}{If the intercept was fitted: for \code{DMR} always equal to \code{TRUE}.}
 #'
 #'
 #' @seealso \code{\link{print.DMR}} for printing, \code{\link{plot.DMR}} for plotting, \code{\link{coef.DMR}} for extracting coefficients and \code{\link{predict.DMR}} for prediction.
@@ -51,7 +55,7 @@
 #' ypr <- predict(m1, newx = Xte, df = g$df.min)
 #'
 #' ## DMR for logistic regression
-#' # notice that only part of dataset promoter was used since DMR works only if p<n, for p>n use DMRnet
+#' # notice that only part of dataset promoter was used: DMR works only if p<n, for p>=n use DMRnet
 #' data(promoter)
 #' ytr <- factor(promoter[1:80,1])
 #' Xtr <- promoter[1:80,2:11]
@@ -66,16 +70,16 @@
 #'
 #' @export DMR
 
-DMR <- function(X, y, family = "gaussian", clust.method = 'complete', lam = 10^(-7)){
+DMR <- function(X, y, family = "gaussian", clust.method = 'complete', lam = 10^(-7), lambda = NULL){
     X <- data.frame(X, check.names = TRUE, stringsAsFactors = TRUE)
     typeofcols <- sapply(1:ncol(X),function(i) class(X[,i]))
     if(sum(unlist(typeofcols) == "ordered") > 0) stop("Error: there is an ordered factor in the data frame, change it to factor")
     if (family == "gaussian"){
-       return(DMR4lm(X, y, clust.method = clust.method))
+       return(DMR4lm(X, y, clust.method = clust.method, lam = lam))
     } else{
        if (family == "binomial"){
           return(DMR4glm(X, y, clust.method = clust.method, lam = lam))
        }
-       else stop("Error: wrong family, should be one of gaussian, binomial")
+       else stop("Error: wrong family, should be one of: gaussian, binomial")
     }
 }

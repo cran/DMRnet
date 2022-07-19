@@ -1,5 +1,5 @@
-DMR4glm <- function(X, y, clust.method = 'complete', lam = 10^(-7)){
-    if (class(y) != "factor"){
+DMR4glm <- function(X, y, clust.method, lam){
+    if (!inherits(y, "factor")){
        stop("Error: y should be a factor")
     }
     lev <- levels(factor(y))
@@ -13,7 +13,7 @@ DMR4glm <- function(X, y, clust.method = 'complete', lam = 10^(-7)){
               stop("Error: non-conforming data: nrow(X) not equal to length(y)")
     }
     ssd <- apply(X, 2, function(x) length(unique(x)))
-    if (ssd[1] == 1 & (class(X[,1]) == "numeric" | class(X[,1]) == "integer")){
+    if (ssd[1] == 1 & (inherits(X[,1], "numeric") | inherits(X[,1], "integer"))){
        X <- X[,-1, drop = FALSE]
        ssd <- ssd[-1]
     }
@@ -29,23 +29,20 @@ DMR4glm <- function(X, y, clust.method = 'complete', lam = 10^(-7)){
     if(sum(nn != "numeric" & nn != "factor" ) > 0){
               stop("Error: wrong data type, columns should be one of types: integer, factor, numeric")
     }
-    x.full <- stats::model.matrix(y~., data = data.frame(y=y, X[,order(nn), drop = FALSE], check.names = TRUE))
-    p <- ncol(x.full)
-    if (p > n){
-       stop("Error: p > n, DMR works only for p < n, use DMRnet instead")
-    }
-    lmin <- lam*length(y)*2
-    lmax <- lmin*1000
-    RL <- exp(seq(log(lmax), log(lmin), length.out = 20))
-    m <- glmnet::glmnet(x.full, y, lambda = RL, alpha = 0, family = "binomial")
-    be <- c(m$a0[20], m$beta[-1,20])
-    faki <- which(nn == "factor")
-    n.factors <- length(faki)
-    if (length(faki) > 0){
-       n.levels <- sapply(1:n.factors, function(i) length(levels(X[,faki[i]])))
-       p.fac <- sum(n.levels - 1)
+
+    X <- X[, order(nn), drop = FALSE]
+    nn <- sort(nn)
+
+    factor_columns <- which(nn == "factor")
+    n.factors <- length(factor_columns)
+    if (n.factors > 0) {
+        X[,factor_columns]<-lapply(1:n.factors, function(i) factor(X[,factor_columns[i]]))   #recalculate factors to minimal possible set
+        levels.listed<-lapply(1:n.factors, function(i) levels(X[,factor_columns[i]]))
+        n.levels <- sapply(1:n.factors, function(i) length(levels.listed[[i]]))
+        p.fac <- sum(n.levels - 1)   #sum of factor dimensions. Again, for a factor with k levels it is taking (k-1) as a summand
     } else{
-       p.fac <- 0
+        p.fac <- 0
+        levels.listed<-c()
     }
     cont <- which(nn == "numeric")
     n.cont <- length(cont)
@@ -60,6 +57,21 @@ DMR4glm <- function(X, y, clust.method = 'complete', lam = 10^(-7)){
                                ord <- 2:(n.cont + 1)
               }
     }
+
+
+    x.full <- stats::model.matrix(y~., data = data.frame(y=y, X, check.names = TRUE))
+
+    #x.full <- stats::model.matrix(y~., data = data.frame(y=y, X[,order(nn), drop = FALSE], check.names = TRUE))
+    p <- ncol(x.full)
+    if (p > n){
+        stop("Error: p > n, DMR works only for p < n, use DMRnet instead")
+    }
+    lmin <- lam*length(y)*2
+    lmax <- lmin*1000
+    RL <- exp(seq(log(lmax), log(lmin), length.out = 20))
+    m <- glmnet::glmnet(x.full, y, lambda = RL, alpha = 0, family = "binomial")  #SzN per explanation of PP, this is regularized with ridge penalty (alpha=0) to help with computations of singular cases, but not to sparsify the betas as lasso penalty could
+    be <- c(m$a0[20], m$beta[-1,20])
+
     zb <- exp(x.full%*%be)
     pix <- zb/(zb + 1)
     w <- as.numeric(pix*(1-pix))
@@ -73,7 +85,10 @@ DMR4glm <- function(X, y, clust.method = 'complete', lam = 10^(-7)){
           i1 <- ifelse(i == 1, 2, sum(n.levels[1:(i - 1)] - 1) + 2)
           i2 <- sum(n.levels[1:i] - 1) + 1
           out <- w_stats(be[i1:i2], Var[i1:i2, i1:i2], ind1 = i1, ind2 = i2)
-          rownames(out) <- colnames(out) <- levels(X[,faki[i]])
+
+          out[ out<0 ] <- lam    #this fix is for DMR, it replaces negative values with a very small positive number. The reason negative values are out there is numerical instability when Kan is very close to 0 and Var is not symmetric, then w_stats produces negative numbers
+
+          rownames(out) <- colnames(out) <- levels(X[,factor_columns[i]])
           return(out)
        })
        #cutting dendrograms
@@ -103,7 +118,7 @@ DMR4glm <- function(X, y, clust.method = 'complete', lam = 10^(-7)){
     sp <- list()
     form <- c()
     nl <- 0
-    Z1 <- X[, faki, drop = FALSE]
+    Z1 <- X[, factor_columns, drop = FALSE]
     if (n.factors > 0){
             for (i in 1:n.factors){
                 sp[[i]] <- 1:n.levels[i]
@@ -136,7 +151,7 @@ DMR4glm <- function(X, y, clust.method = 'complete', lam = 10^(-7)){
            if(length(sp[[kt]][sp[[kt]] != 1]) > 0){
                                        sp[[kt]][sp[[kt]] != 1] <- sp[[kt]][sp[[kt]] != 1] + dod - min(sp[[kt]][sp[[kt]] != 1])
            }
-           Z1[,kt] <- X[, faki[kt]]
+           Z1[,kt] <- X[, factor_columns[kt]]
            levels(Z1[,kt]) <- sp[[kt]]
            Z1[,kt] <- factor(Z1[,kt])
            if (kt < length(sp)) for( x in (kt+1):length(sp)){ if (length(sp[[x]][sp[[x]]!=1]) > 0 ) sp[[x]][sp[[x]]!= 1] = sp[[x]][sp[[x]]!=1] - 1}
@@ -165,6 +180,12 @@ DMR4glm <- function(X, y, clust.method = 'complete', lam = 10^(-7)){
      }
    }
    m <- stats::glm.fit(as.matrix(rep(1, length(y))), y, family = stats::binomial())
+
+   min_value <- min(c(abs(m$coef[!is.na(m$coef)]), abs(b[!is.na(b) & (b!=0)])))
+   b[is.na(b)] <- min_value / 1000.0
+   m$coef[is.na(m$coef)] <- min_value / 1000.0 #setting a very small (close to 0) value for the variables exceeding design matrix rank
+                            #consult the comment in part2beta_help() for longer explanation
+
    b = cbind(b, c(m$coef, rep(0, length(heig) - 1)))
    zb = exp(m$coef*rep(1, length(y)))
    pix = zb/(zb + 1)
@@ -175,7 +196,7 @@ DMR4glm <- function(X, y, clust.method = 'complete', lam = 10^(-7)){
                   ind[ord] = (p - length(ord) + 1):p
                   b = b[ind,]
    }
-   fit <- list(beta = b, df = p:1, loglik = loglik, n = n, arguments = list(family = "binomial", clust.method = clust.method, lam = lam), interc = TRUE)
+   fit <- list(beta = b, df = p:1, loglik = loglik, n = n, levels.listed = levels.listed, lambda=numeric(0), arguments = list(family = "binomial", clust.method = clust.method, lam = lam), interc = TRUE)
    class(fit) = "DMR"
    return(fit)
 }

@@ -1,4 +1,4 @@
-DMR4glm_help <- function(X, y, clust.method = 'complete', lam = 10^(-7)){
+DMR4glm_help <- function(X, y, clust.method, lam){
     n <- nrow(X)
     nn <- sapply(1:ncol(X), function(i) class(X[,i]))
     names(nn) <- colnames(X)
@@ -8,7 +8,7 @@ DMR4glm_help <- function(X, y, clust.method = 'complete', lam = 10^(-7)){
     lmin <- lam*length(y)*2
     lmax <- lmin*1000
     RL <- exp(seq(log(lmax), log(lmin), length.out = 20))
-    m <- glmnet::glmnet(x.full, y, lambda = RL, alpha = 0, family = "binomial")
+    m <- glmnet::glmnet(x.full, y, lambda = RL, alpha = 0, family = "binomial")  #SzN per explanation of PP, this is regularized with ridge penalty (alpha=0) to help with computations of singular cases, but not to sparsify the betas as lasso penalty could
     be <- c(m$a0[20], m$beta[-1,20])
     faki <- which(nn == "factor")
     n.factors <- length(faki)
@@ -34,6 +34,9 @@ DMR4glm_help <- function(X, y, clust.method = 'complete', lam = 10^(-7)){
           i1 <- ifelse(i == 1, 2, sum(n.levels[1:(i - 1)] - 1) + 2)
           i2 <- sum(n.levels[1:i] - 1) + 1
           out <- w_stats(be[i1:i2], Var[i1:i2, i1:i2], ind1 = i1, ind2 = i2)
+
+          out[ out<0 ] <- lam    #this fix is for DMRnet, it replaces negative values with a very small positive number. The reason negative values are out there is numerical instability when Kan is very close to 0 and Var is not symmetric, then w_stats produces negative numbers
+
           rownames(out) <- colnames(out) <- levels(X[,faki[i]])
           return(out)
        })
@@ -76,7 +79,7 @@ DMR4glm_help <- function(X, y, clust.method = 'complete', lam = 10^(-7)){
      Z <- cbind(Z1,Z2)
      dane <- data.frame(y=y, Z, check.names = T)
      ZZ <- stats::model.matrix(y~., data = dane)
-     m <- glmnet::glmnet(ZZ, y, lambda = RL, alpha = 0, family = "binomial")
+     m <- glmnet::glmnet(ZZ, y, lambda = RL, alpha = 0, family = "binomial") #SzN per explanation of PP, this is regularized with ridge penalty (alpha=0) to help with computations of singular cases, but not to sparsify the betas as lasso penalty could
      b <- c(m$a0[20], m$beta[-1,20])
      names(b) <- colnames(ZZ)
      zb = exp(ZZ%*%be)
@@ -126,6 +129,12 @@ DMR4glm_help <- function(X, y, clust.method = 'complete', lam = 10^(-7)){
      }
    }
    m <- stats::glm.fit(as.matrix(rep(1, length(y))), y, family = stats::binomial())
+
+   min_value <- min(c(abs(m$coef[!is.na(m$coef)]), abs(b[!is.na(b) & (b!=0)])))
+   b[is.na(b)] <- min_value / 1000.0
+   m$coef[is.na(m$coef)] <- min_value / 1000.0 #setting a very small (close to 0) value for the variables exceeding design matrix rank
+                    #consult the comment in part2beta_help() for longer explanation
+
    b = cbind(b, c(m$coef, rep(0, length(heig) - 1)))
    zb = exp(m$coef*rep(1, length(y)))
    pix = zb/(zb + 1)

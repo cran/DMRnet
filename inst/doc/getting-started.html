@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Szymon Nowakowski" />
+
+
+<title>Getting Started with DMRnet</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Getting Started with DMRnet</h1>
+<h4 class="author">Szymon Nowakowski</h4>
+
+
+
+<div id="this-document" class="section level1">
+<h1>This document</h1>
+<p>The purpose of this vignette is to introduce readers to
+<code>DMRnet</code> package, bring them up to speed by providing a
+simple use case example and point interested readers towards more
+comprehensive informative material.</p>
+</div>
+<div id="dmrnet-package" class="section level1">
+<h1><code>DMRnet</code> package</h1>
+<p><code>DMRnet</code> is an <code>R</code> package for regression and
+classification with a family of model selection algorithms.
+<code>DMRnet</code> package supports both continuous and categorical
+predictors. The overall number of regressors may exceed the number of
+observations.</p>
+<p>The selected model consists of a subset of numerical regressors and
+partitions of levels of factors.</p>
+<p>The available model selection algorithms are the following:</p>
+<ul>
+<li><code>DMRnet</code> is the default and the most comprehensive model
+selection algorithm in the package, it can be used both for <span class="math inline">\(p&lt;n\)</span> and <span class="math inline">\(p
+\geq n\)</span> scenarios. It first executes a screening step in order
+to reduce the problem to <span class="math inline">\(p&lt;n\)</span> and
+then uses <code>DMR</code> subsequently.</li>
+<li><code>GLAMER</code> is a model selection algorithm that can be used
+both for <span class="math inline">\(p&lt;n\)</span> and <span class="math inline">\(p \geq n\)</span> scenarios. In comparison to
+<code>DMRnet</code>, the step of reordering variables based on their
+t-statistics is skipped. This is the first partition selection algorithm
+in literature for which a partition selection consistency has been
+proven for high dimensional scenario [Nowakowski <em>et al.</em>,
+2021].</li>
+<li><code>DMR</code> [Maj-Kańska <em>et al.</em>, 2015] is a model
+selection algorithm that can be used for <span class="math inline">\(p&lt;n\)</span> scenario only.</li>
+<li><code>SOSnet</code> [Pokarowski and Mielniczuk, 2015, Pokarowski
+<em>et al.</em>, 2022] is a model selection algorithm that is used both
+for <span class="math inline">\(p&lt;n\)</span> and <span class="math inline">\(p \geq n\)</span> scenarios for continuous-only
+regressors (with no categorical variables and, consequently, no
+partition selection).</li>
+</ul>
+<p>Algorithm-wise, the package user has the following choices:</p>
+<ul>
+<li>The user can select <code>DMRnet</code> algorithm by calling
+<code>DMRnet()</code> or <code>cv.DMRnet()</code> functions.</li>
+<li>The user can select <code>GLAMER</code> algorithm by calling
+<code>DMRnet()</code> or <code>cv.DMRnet()</code> functions and passing
+<code>algorithm=&quot;glamer&quot;</code> parameter.</li>
+<li>The user can select <code>DMR</code> algorithm by calling
+<code>DMR()</code> or <code>cv.DMR()</code> functions.</li>
+<li>The <code>SOSnet</code> algorithm is automatically chosen if
+<code>DMRnet()</code> or <code>cv.DMRnet()</code> functions were called
+with an input consisting of continuous-only regressors.</li>
+</ul>
+<p>As this vignette is introductory only, and the choice of an algorithm
+is a somewhat more advanced topic, from now on it is assumed that the
+user works with <code>DMRnet</code> algorithm only.</p>
+</div>
+<div id="ok-so-lets-get-started" class="section level1">
+<h1>OK, so let’s get started</h1>
+<p>To load the package into memory execute the following line:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DMRnet)              </span></code></pre></div>
+<p><code>DMRnet</code> package features two built-in data sets: <a href="https://archive.ics.uci.edu/ml/datasets/Molecular+Biology+%28Promoter+Gene+Sequences%29">Promoter</a>
+and Miete [Fahrmeir <em>et al.</em>, 2004].</p>
+<p>We will work with Miete data set in this vignette. The Miete data
+consists of <span class="math inline">\(n = 2053\)</span> households
+interviewed for the Munich rent standard 2003. The response is
+continuous, it is monthly rent per square meter in Euros. There are 9
+categorical and 2 continuous variables.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;miete&quot;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> miete[,<span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> miete<span class="sc">$</span>rent</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(X)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   bathextra tiles area kitchen rooms best good warm central year size</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1         0     0    2       0     2    0    1    0       0 1918   68</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2         0     0    2       0     2    0    1    0       0 1995   65</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3         0     0    2       0     3    0    1    0       0 1918   63</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4         1     0   16       0     3    0    0    0       0 1983   65</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5         1     0   16       1     4    0    1    0       0 1995  100</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6         0     0   16       0     4    0    0    0       0 1980   81</span></span></code></pre></div>
+<p>Out of 9 categorical variables 7 have 2 levels each, and the two
+remaining (<code>area</code> and <code>rooms</code>) have 25 and 6
+levels, respectively. This sums up to 45 levels. The way
+<code>DMRnet</code> handles levels results in 36 parameters for the
+categorical variables (the first level in each categorical variable is
+already considered included in the intercept). The 2 continuous
+variables give 2 additional parameters, which totals in <span class="math inline">\(p = 39\)</span> (including one parameter for the
+intercept).</p>
+</div>
+<div id="estimating-and-inspecting-a-sequence-of-models" class="section level1">
+<h1>Estimating and inspecting a sequence of models</h1>
+<p>In contrast to explicit group lasso methods which need a design
+matrix with explicit groups, <code>DMRnet</code> package internally
+transforms an input matrix into a design matrix (e.g. by expanding
+factors into a set of one-hot encoded dummy variables). Thus,
+<code>X</code> needs no additional changes and already is all set to be
+fed into <code>DMRnet</code>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>models <span class="ot">&lt;-</span> <span class="fu">DMRnet</span>(X, y, <span class="at">family=</span><span class="st">&quot;gaussian&quot;</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>models</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Arguments:  </span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $family</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;gaussian&quot;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $clust.method</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;complete&quot;</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $o</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 5</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $nlambda</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 100</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $maxp</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1027</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $lambda</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; NULL</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Family of models:  </span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       Df       RSS</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [1,] 39  44889691</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [2,] 38  44889694</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [3,] 37  44889702</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [4,] 36  44889714</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [5,] 35  44889736</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [6,] 34  44889761</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [7,] 33  44889800</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [8,] 32  44889868</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [9,] 31  44890015</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [10,] 30  44890219</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [11,] 29  44890407</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [12,] 28  44890641</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [13,] 27  44890887</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [14,] 26  44891333</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [15,] 25  44892150</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [16,] 24  44892640</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [17,] 23  44894059</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [18,] 22  44898820</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [19,] 21  44904071</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [20,] 20  44910418</span></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [21,] 19  44921810</span></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [22,] 18  44930083</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [23,] 17  44958900</span></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [24,] 16  45063641</span></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [25,] 15  45106343</span></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [26,] 14  45232724</span></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [27,] 13  45290696</span></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [28,] 12  45367049</span></span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [29,] 11  45699667</span></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [30,] 10  46235150</span></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [31,]  9  46865054</span></span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [32,]  8  47378415</span></span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [33,]  7  48034125</span></span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [34,]  6  49694598</span></span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [35,]  5  50786340</span></span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [36,]  4  53188046</span></span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [37,]  3  56328078</span></span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [38,]  2  61742060</span></span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [39,]  1 123608575</span></span></code></pre></div>
+<p>Here, <code>family=&quot;gaussian&quot;</code> argument was used to indicate,
+that we are interested in a linear regression for modeling a continuous
+response variable. The <code>family=&quot;gaussian&quot;</code> is the default and
+could have been omitted as well. In a printout above you can notice a
+bunch of other default values set for some other parameters
+(e.g. <code>nlambda=100</code> requesting the cardinality of a net of
+lambda values used) in model estimation.</p>
+<p>The last part of a printout above presents a sequence of models
+estimated from <code>X</code>. Notice the models have varying number of
+parameters (model dimension <code>df</code> ranges from 39 for a full
+model down to 1 for the 39-th model).</p>
+<p>Let us plot the path for the coefficients for the 10 smallest models
+as a function of their model dimension <code>df</code>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(models, <span class="at">xlim=</span><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">10</span>), <span class="at">lwd=</span><span class="dv">2</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>Notice how you can also pass other parameters
+(<code>xlim=c(1, 10), lwd=2</code>) to change the default behavior of
+the <code>plot()</code> function.</p>
+<p>To inspect the coefficients for a particular model in detail, one can
+use the <code>coef()</code> function. For the sake of the example, let’s
+examine the last model from the plot, with <code>df=10</code>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(models, <span class="at">df=</span><span class="dv">10</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  (Intercept)       tiles1        area7       area10       area11       area14 </span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; -2696.776884   -41.326719   -55.358136   -55.358136   -55.358136   -55.358136 </span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       area16       area17       area19       area20       area22       area23 </span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   -55.358136   -55.358136   -55.358136   -55.358136   -55.358136   -55.358136 </span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       area24       area25     kitchen1        best1        good1        warm1 </span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   -55.358136   -55.358136   115.522301   133.699574    39.478992  -173.480798 </span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     central1         year         size </span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   -73.402473     1.428681     6.950459</span></span></code></pre></div>
+<p>Notice how <code>area</code>-related coefficients are all equal,
+effectively merging all 12 listed <code>area</code> levels with a
+coefficient -55.36 and merging all 13 remaining <code>area</code> levels
+with a coefficient 0.0.</p>
+</div>
+<div id="selecting-best-models" class="section level1">
+<h1>Selecting best models</h1>
+<p>There are two basic methods for model selection supported in
+<code>DMRnet</code> package. One is based on a <span class="math inline">\(K\)</span>-fold Cross Validation (CV), the other
+is based on Generalized Information Criterion (GIC) [Foster and George,
+1994].</p>
+<div id="model-selection-with-gic" class="section level2">
+<h2>Model selection with GIC</h2>
+<p>A GIC-based model selection is performed directly on a precomputed
+sequence of models</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>gic.model <span class="ot">&lt;-</span> <span class="fu">gic.DMR</span>(models)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(gic.model)</span></code></pre></div>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAkAAAAGACAMAAAByRC0tAAAAUVBMVEUAAAAAADoAAGYAOpAAZrY6AAA6ADo6AGY6ZmY6kNtmAABmtv+QOgCQZgCQkGaQtpCQ2/+2ZgC2///bkDrb///fU2v/tmb/25D//7b//9v///+cZ5jeAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAKF0lEQVR4nO3dYVvaWhqGUVrrmdE6M6VUVP7/Dx2SIEVLwPBkx0261oczXnNpXsG7IQkhWWwgsPjsX4DrJiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIjJyQAtm4rMCGndxfBYBEREQEQERqSWgAVtj1KSSgAZtz1OROgIauEdIPQREREBE6gjINtDVqiQge2HXqpaAuFICIiIgIgIiIiAiAiIycUDDT2SjbtZARAREREBEBEREQEQERERARAREREBEBEREQEQERERARAREREBEBEREQEQERERARAREREBECgW0XCy+vTwsFovvoyyOapUJaHXza9vQt83m+f5uhMVRryIBvTxss1l/+bHpUkoXR8WKBPR8v33lWn/9uXn9b7Y4KmYNRKTwNlCbUrw46mUvjIjjQEQERKRQQO3L11bPPpiAZqPQRvRit+28XtiInrdyu/Edu/EzV+5AYseBxJmzBiJSahtotwqyDTR3hfbCnu+7vbCe9Y+AZsNxICICIlIwoL4dsAsXR5UERERAREoFtOr2wtqTykZYHLWyBiIiICICIuI4EBEBESkX0PP94ubXsue9VAHNRbGA1l9+rG5+vf9oszsWzk2pgJpTgppzgVZOKJu3UgE1JyU2ATkjceZKr4GWzkict8LbQKu+j6YKaCaK7oV5L2z+HAciIiAiPtpMxEebifhgIREfbSZiDUTER5uJ+GgzEceBiAiISOmAnA80c9ZARAREREBEBEREQEQGB/Ty8G3736fbvg98NV4PI544oUNAMzE0oOf77uDy6/8e9/Jw6nPxg+ZSt6EB7T9l0Xs31Fa3nhpjLnUbGNAH3mfvrHvvFDZwLnUbGNAHzvQZeS51GxzQ7zWQgLhgG2i/bdP3mdOR51K3oQE93X5/90XhudRt8HGg3TmGq75TDceeS92GH4nuPvJ1Zi99vLnUzVsZRAREREBEBh8HOvs26chzqZs1EBEBERke0PLb5uk23pEX0ExcdD5QcxT66Z++q9eNO5e6XXQ+UBPQ2TN+RppL3S46H6h9H8y78WwuPB+oDcj5QGycD0QoOB/INhDB+UDr3muIjzuXul1wPlC75um9h8HYc6nbBUeilycvPTb2XOrmrQwiAiIycUBueTk31kBEBEREQEQERERARAREREBEBEREQEQERERARAREREBEBEREQEQERERARAREREBEBEREQESKBHT6bnSDF0fFCgX075O3xBy4OCpWKKC7zer0RRQFNBPFAmouw3CiIQHNRMGANm1D7to8b2UDGmdxVExARBwHIiIgIoUC6m5reOKOPgKaiTIB7e+ouu67taqAZqJIQN317Furnjc1BDQThfbC9pdw7buevYBmwhqISKltoNfLkdsGmrlCe2Gv91btPa1DQDPhOBARAREpGNDJG4oJaCYERKTCgFzG/pqUCmjV7YX13lSsf3FuhHBVqlsDuZXGdREQEQERqe84kH6uSn0B2Qu7KuUCer5f3Pxa9p1dr5GZKBbQ+suP1c2v95/PcMfCuSkVUHNKUHMu0MoJZfNWKqDmpMQmIGckzlzpNdDSGYnzVngbaH9qYro4KlV0L+yi98LefJeN7dpVeBzo4JvsrlWv5oDs8F+Bmj/aLKArUPNHmwV0Bar+YKF+6lf3R5v1U72q10Bvf0JMNbqajzZ7OavTtXy02QZ1pWo+DvTm+wVUgz//BALiqIMn+/eXR/4GpQMa7Xwg/ZRyLpXfXx77V3wta6Cex8kAh0/bx1M5/uXvBX14+uW/+NiLszI65+zrz4BU5hfQm4fxt6d02evPpdVMtw203G76PN3G5wMd/9HTj2iuLkrlVAgfTeXdmuv9r/Xh3/+j39ho+/nnx5s3NYLFvfvR0+vUq3f4gNJUzgf0gVROPsOF3gu720bU3iysxFVajz8RV+jcSiVPpaeUi1LpeQyjf+OmW+/s3g8r8qmMt/9krmFz6FwqJ1YOWSo9pYz3ZBV6CduufVbF1kCHizn/VE3solROhRCmUvqpKBPQ8/3Xn+0qaN23FT3Wozq6MpqkpeN/pMtSOR9QBakcV2gvrLnZZaP3pqmjP9bz/0SHPcO9fRzOO/5ljZsqxZQKaOLFXfCX2f/k4+Pj5o//+0QfJ8bVu6lSzGwCGr5xsfu5x8d9QZeFcD6gal9/RjCfgI6uPs7/yR8f9wVdWM3h0uacynEzCuhw6R9u6dKA+kqZcSrHzTOgw0GnW+oJ6Ow20N9XSo/ZB3Q48+jezdFtoPN7YXT+poAOx5/bC+OD/tKAGIuAiAiIiICIfFpAzMQnBVRwodWMm/nDGzhOQNXPq3ucgKqfV/c4AVU/r+5xAqp+Xt3jBFT9vLrHCaj6eXWPE1D18+oeJ6Dq59U9znsPRAREREBEBEREQEQERERARAREREBEBEREQEQERERARMYPaH3iOuSje/rXz+lmtvesvptu3up1ymRP6bK9duqgcaMH1Fx/s/canGNrrvo52cyXh+2IVXN9yGnmNXdEaqdM9pSu2zsJDhs3dkDddaSXvVfhHNW6u4P9RDOfbpvL8692F6otPq+9rPvLw7fpntLn+yaggePGDmj/LI+83GPWi7v2gudTzmz+bU44rwlosnGrm/9sAxo4bvSAmltp9F7IfnRdQFPOXH79OeG81falZKpx2znNNtDAcWMH1L14TrYR1D7OKWc296uebN663WafaFzz0tUENHCcgIbNe92Gnmjey8PNr4nGNXevqCCgeb+Erdu9+CkfY7PJNcm4dkoFL2GTbtC+BjTZVmZ3FGjKx7idNc241e6yLkPHXfVu/C6gqWauFt1t9qaZ1/0h11MdNWgtP383ftoDibs17TQzn27vXqdOMm//15zuKV1+/oHEgwPwU9i9VE8yc7eSbwZN8xiXzSvKbvKUb2UMGufNVCICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIabN1erHVxd/47/wYCGmwbUHsFVRoCGqwN6Ptn/xa1ENAgzZVP/vvlf7fdBaoR0DDL5uLxC2ugAwIaoLvq3FJABwQ0wP6CegLaE9AAKwH9QUADWAP9SUAD7C6hLKADAhqiufeJvbA3BDRIdxxIQL8JiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIj8Hy83WQ9q8/DPAAAAAElFTkSuQmCC" /><!-- --></p>
+<p>One can read a model dimension with</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>gic.model<span class="sc">$</span>df.min</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 12</span></span></code></pre></div>
+<p>One also has access to the best model coefficients with</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(gic.model)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  (Intercept)   bathextra1       tiles1        area7       area10       area11 </span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; -2736.453989    59.260643   -42.372063   -55.249855   -55.249855   -55.249855 </span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       area14       area15       area16       area17       area19       area20 </span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   -55.249855   -55.249855   -55.249855   -55.249855   -55.249855   -55.249855 </span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       area21       area22       area23       area24       area25     kitchen1 </span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   -55.249855   -55.249855   -55.249855   -55.249855   -55.249855   111.371688 </span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       rooms4       rooms5       rooms6        best1        good1        warm1 </span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   -44.187398   -44.187398   -44.187398   127.381589    39.499137  -168.441539 </span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     central1         year         size </span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   -74.219946     1.443990     7.156026</span></span></code></pre></div>
+</div>
+<div id="model-selection-with-k-fold-cross-validation" class="section level2">
+<h2>Model selection with <span class="math inline">\(K\)</span>-fold
+Cross Validation</h2>
+<p>The default <span class="math inline">\(K\)</span> value is 10.
+Because the data needs to be partitioned into CV subsets which alternate
+as training and validating sets, the precomputed sequence of models in
+<code>models</code> variable cannot be used directly, as was the case
+with GIC-based model selection. Alternatively, to perform a 10-fold
+CV-based model selection execute</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>cv.model <span class="ot">&lt;-</span> <span class="fu">cv.DMRnet</span>(X, y)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(cv.model)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>As before, one can access a model dimension with</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>cv.model<span class="sc">$</span>df.min</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 12</span></span></code></pre></div>
+<p>Well, the dimension is the same as when we used GIC directly. Let’s
+check if the CV-selected model is the same as the best model selected
+with GIC:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(cv.model)<span class="sc">==</span><span class="fu">coef</span>(gic.model)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)  bathextra1      tiles1       area7      area10      area11 </span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        TRUE        TRUE        TRUE        TRUE        TRUE        TRUE </span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      area14      area15      area16      area17      area19      area20 </span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        TRUE        TRUE        TRUE        TRUE        TRUE        TRUE </span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      area21      area22      area23      area24      area25    kitchen1 </span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        TRUE        TRUE        TRUE        TRUE        TRUE        TRUE </span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      rooms4      rooms5      rooms6       best1       good1       warm1 </span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        TRUE        TRUE        TRUE        TRUE        TRUE        TRUE </span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    central1        year        size </span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        TRUE        TRUE        TRUE</span></span></code></pre></div>
+</div>
+</div>
+<div id="predicting-response-for-new-observations" class="section level1">
+<h1>Predicting response for new observations</h1>
+<p>Models selected with both model selection methods can be used to
+predict response variable values for new observations:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(gic.model, <span class="at">newx=</span><span class="fu">head</span>(X))</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       [,1]</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 559.2277</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 648.9469</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 523.4476</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 596.1306</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 970.6029</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 602.8470</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(cv.model, <span class="at">newx=</span><span class="fu">head</span>(X))</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       [,1]</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 559.2277</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 648.9469</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 523.4476</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 596.1306</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 970.6029</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 602.8470</span></span></code></pre></div>
+<p>No wonder the corresponding predictions are all equal, since the
+selected models were the same.</p>
+<p>One can predict the response variable values for the whole sequence
+of models as well:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(models, <span class="at">newx=</span><span class="fu">head</span>(X))</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       df39     df38     df37     df36     df35     df34     df33     df32</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 570.1916 570.1880 570.1944 570.2044 570.2462 570.2468 570.2519 570.2554</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 663.6774 663.6772 663.7068 663.7338 663.7017 663.7233 663.7777 663.8257</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 519.4320 519.4302 519.4352 519.4451 519.4860 519.4831 519.4827 519.4941</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 568.8714 568.8747 568.8634 568.8770 568.8583 568.8622 568.8667 568.8647</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 948.5308 948.5381 948.5760 948.6384 948.6232 948.6464 948.6823 948.7183</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 583.6860 583.6893 583.6874 583.6696 583.6517 583.6554 583.6507 583.6619</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       df31     df30     df29     df28     df27     df26     df25     df24</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 570.2455 570.2503 569.4073 569.4309 569.4629 569.4797 569.5341 569.1385</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 663.8759 663.8688 662.9924 662.9661 662.9836 662.9517 662.8686 662.3913</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 519.4867 519.5139 518.6397 518.6799 518.6922 518.7602 518.7982 518.4336</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 568.8863 568.8725 568.8900 568.8979 568.2476 568.2456 568.1406 568.1838</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 948.7620 948.6792 948.5951 948.6107 947.9537 947.8719 947.6397 947.5754</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 583.6725 583.6609 583.6405 583.6242 583.0231 583.0253 583.0193 582.9143</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       df23     df22     df21     df20     df19     df18     df17     df16</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 569.0645 569.1271 569.4311 570.5289 570.8667 570.3454 570.3404 562.3298</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 662.3284 662.6799 662.7128 663.9165 663.8429 663.4175 663.1364 652.6998</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 518.4404 518.3905 518.6901 519.9875 520.3221 520.7543 521.0591 512.5275</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 568.1961 568.3222 568.1244 569.0227 568.8951 569.5745 581.6448 580.8725</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 947.3725 948.2670 948.6530 948.6425 949.1207 947.5811 959.4972 960.5421</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 582.8929 582.9015 582.6029 583.3883 583.1541 581.7241 594.4963 592.5491</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       df15     df14     df13     df12     df11     df10      df9      df8</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 556.3796 557.3476 557.1075 559.2277 553.6168 555.5438 537.3356 528.6948</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 647.3305 647.7989 647.2196 648.9469 645.3276 644.7009 626.9365 622.1707</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 520.5629 521.4951 521.4796 523.4476 519.7666 520.7916 502.3516 493.5944</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 587.4935 597.0187 597.1792 596.1306 587.3871 532.7196 538.8990 531.8596</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 961.7100 972.8877 970.1441 970.6029 997.1003 948.1311 919.9631 915.9963</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 595.7414 604.5666 602.7236 602.8470 634.4291 639.6409 646.5391 639.7183</span></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        df7      df6      df5      df4      df3      df2     df1</span></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 528.5285 533.6460 526.5034 557.4039 568.6685 559.0850 570.093</span></span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 621.0150 623.7535 650.1912 536.6915 547.5318 538.3833 570.093</span></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 493.3071 498.1606 490.2621 522.8832 533.4407 524.5822 570.093</span></span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 527.6910 551.1119 552.7880 536.6915 547.5318 538.3833 570.093</span></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 917.8128 997.3743 829.1419 929.4490 794.1263 779.9030 570.093</span></span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 635.9730 660.3250 663.0939 647.1579 660.2607 648.7923 570.093</span></span></code></pre></div>
+<p>Notice how the <code>df12</code> model predictions overlap with the
+values we obtained above.</p>
+</div>
+<div id="classification-with-2-classes" class="section level1">
+<h1>Classification with 2 classes</h1>
+<p>For a classification task with 2 classes, the non-default
+<code>family=&quot;binomial&quot;</code> should be provided in a call to
+<code>DMRnet</code> and <code>cv.DMRnet</code> (but not to
+<code>gic.DMR</code>) and the response variable should be a factor with
+two classes, with the last level in alphabetical order interpreted as
+the target class. It is illustrated with the following code with a
+somewhat artificial example:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>binomial_y <span class="ot">&lt;-</span> <span class="fu">factor</span>(y <span class="sc">&gt;</span> <span class="fu">mean</span>(y))     <span class="co">#changing Miete response var y into a binomial factor with 2 classes</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>binomial_models <span class="ot">&lt;-</span> <span class="fu">DMRnet</span>(X, binomial_y, <span class="at">family=</span><span class="st">&quot;binomial&quot;</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>gic.binomial_model <span class="ot">&lt;-</span> <span class="fu">gic.DMR</span>(binomial_models)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>gic.binomial_model<span class="sc">$</span>df.min</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 12</span></span></code></pre></div>
+<p>A corresponding <code>predict</code> call has a <code>type</code>
+parameter with the default value <code>&quot;link&quot;</code>, which returns the
+linear predictors. To change that behavior one can substitute the
+default with <code>type=&quot;response&quot;</code> to get the fitted
+probabilities or <code>type=&quot;class&quot;</code> to get the class labels
+corresponding to the maximum probability. So to get actual values
+compatible with a binomial <code>y</code>, <code>type=&quot;class&quot;</code>
+should be used:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(gic.binomial_model, <span class="at">newx=</span><span class="fu">head</span>(X), <span class="at">type=</span><span class="st">&quot;class&quot;</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   [,1]</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1    0</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2    1</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3    0</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4    1</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5    1</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6    1</span></span></code></pre></div>
+<p>Please note that 1 is the value of a target class in the
+<code>predict</code> output.</p>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<ol style="list-style-type: decimal">
+<li>Szymon Nowakowski, Piotr Pokarowski and Wojciech Rejchel. 2021.
+<em>Group Lasso Merger for Sparse Prediction with High-Dimensional
+Categorical Data.</em> arXiv [stat.ME]. <a href="https://arxiv.org/abs/2112.11114" class="uri">https://arxiv.org/abs/2112.11114</a></li>
+<li>Aleksandra Maj-Kańska, Piotr Pokarowski and Agnieszka Prochenka,
+2015. <em>Delete or merge regressors for linear model selection.</em>
+Electronic Journal of Statistics 9(2): 1749-1778. <a href="https://projecteuclid.org/euclid.ejs/1440507392" class="uri">https://projecteuclid.org/euclid.ejs/1440507392</a></li>
+<li>Piotr Pokarowski and Jan Mielniczuk, 2015. <em>Combined l1 and
+greedy l0 penalized least squares for linear model selection.</em>
+Journal of Machine Learning Research 16(29): 961-992. <a href="https://www.jmlr.org/papers/volume16/pokarowski15a/pokarowski15a.pdf" class="uri">https://www.jmlr.org/papers/volume16/pokarowski15a/pokarowski15a.pdf</a></li>
+<li>Piotr Pokarowski, Wojciech Rejchel, Agnieszka Sołtys, Michał Frej
+and Jan Mielniczuk, 2022. <em>Improving Lasso for model selection and
+prediction.</em> Scandinavian Journal of Statistics, 49(2): 831–863. <a href="doi:10.1111/sjos.12546" class="uri">doi:10.1111/sjos.12546</a></li>
+<li>Ludwig Fahrmeir, Rita Künstler, Iris Pigeot, Gerhard Tutz, 2004.
+Statistik: der Weg zur Datenanalyse. 5. Auflage, Berlin:
+Springer-Verlag.</li>
+<li>Dean P. Foster and Edward I. George, 1994. <em>The Risk Inflation
+Criterion for Multiple Regression.</em> The Annals of Statistics 22 (4):
+1947–75.</li>
+</ol>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
