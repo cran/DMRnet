@@ -48,14 +48,14 @@ cv.DMRnet(
 An object with S3 class "cv.DMR" is  returned,  which  is  a  list  with  the  ingredients  of  the  cross-validation fit.
 \describe{
   \item{df.min}{df (number of parameters) of the model with minimal cross-validated error.}
-  \item{df.1se}{df (number of parameters) of the smallest model falling under the upper curve of a prediction error plus one standard deviation. Only for the indexation.mode equal to \code{"dimension"}, otherwise it is set to \code{NULL}.}
+  \item{df.1se}{df (number of parameters) of the smallest model falling under the upper curve of a prediction error plus one standard deviation.}
   \item{dmr.fit}{Fitted \code{DMR} object for the full data.}
   \item{cvm}{The mean cross-validated error for the entire sequence of models.}
   \item{foldid}{The fold assignments used.}
 }
 }
 \description{
-Does k-fold cross-validation for DMR and returns a value for df.
+Executes k-fold cross-validation for DMR and returns a value for df.
 }
 \details{
 cv.DMRnet algorithm does \code{nfold}-fold cross-validation for DMRnet. The df for the minimal estimated prediction error is returned.

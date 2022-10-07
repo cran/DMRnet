@@ -1,6 +1,6 @@
 #' @title cross-validation for DMR
 #'
-#' @description Does k-fold cross-validation for \code{DMR} and returns a value for df.
+#' @description Executes k-fold cross-validation for \code{DMR} and returns a value for df.
 #'
 #' @param X Input data frame, of dimension n x p; \code{DMR} works only if p<n, for p>=n see \code{\link{DMRnet}}; each row is an observation vector. Columns can be numerical or integer for continuous predictors or factors for categorical predictors.
 #'
@@ -21,7 +21,7 @@
 #' @return An object with S3 class \code{"cv.DMR"} is  returned,  which  is  a  list  with  the  ingredients  of  the  cross-validation fit.
 #' \describe{
 #'   \item{df.min}{df (number of parameters) of the model with minimal cross-validated error.}
-#'   \item{df.1se}{df (number of parameters) of the smallest model falling under the upper curve of a prediction error plus one standard deviation. Only for the indexation.mode equal to \code{"dimension"}, otherwise it is set to \code{NULL}.}
+#'   \item{df.1se}{df (number of parameters) of the smallest model falling under the upper curve of a prediction error plus one standard deviation.}
 #'   \item{dmr.fit}{Fitted \code{DMR} object for the full data.}
 #'   \item{cvm}{The mean cross-validated error for the entire sequence of models.}
 #'   \item{foldid}{The fold assignments used.}
