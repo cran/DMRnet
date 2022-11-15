@@ -1,10 +1,23 @@
 
+# DMRnet 0.3.3
+
+- Updating documentation to reflect that for inference the matrix must be provided without the intercept column
+- Fixing incorrect inference for columns not in first-factors-then-numerics sequence
+- Candidate fix for warnings related to ([issue #33](https://github.com/SzymonNowakowski/DMRnet/issues/33))
+- Setting a default `nlambda` value to 100 in `cv.DMRnet()` ([issue #41](https://github.com/SzymonNowakowski/DMRnet/issues/41))
+- Fixing problems when few or no models are available in cross validation
+- Fixing problems when few or no models are available after `grpreg` ([issue #39](https://github.com/SzymonNowakowski/DMRnet/issues/39))
+- Refactoring the code to distribute the no-model fixes from gaussian `DMRnet` into binomial family `DMRnet` and both `SOSnet`s and `GLAMER`s
+- Fixing a few other minor long-standing issues in GIC-indexed cross validation
+- Fixing df.1se in GIC-indexed cross validation for binomial GLAMER
+- Fixing incorrect loglik calculation for the first (largest) model in binomial family, for both `GLAMER` (`-Inf`) and `DMRnet` (incorrect)
+
 # DMRnet 0.3.2
 
 - Improved readability of a getting-started vignette
 - Fixed a bug in model-indexed cross validation related to folds with different model sizes
 - Added df.1se to GIC-indexed cross validation
-- Improved CV plots with df.1se model
+- Improved CV plots with `df.1se` model
 - Improved readability of README on CRAN ([issue #32](https://github.com/SzymonNowakowski/DMRnet/issues/32))
 - Welcome message on package load added
 

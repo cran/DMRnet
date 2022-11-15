@@ -19,9 +19,9 @@ clusters_4lm_help <- function(S, betas_with_intercept, X, y, clust.method, lam){
   } else{
     p.fac <- 0
   }
-  cont <- which(nn == "numeric")
-  n.cont <- length(cont)
-  namCont <- names(nn)[cont]
+  continous_columns <- which(nn == "numeric")
+  n.cont <- length(continous_columns)
+  namCont <- names(nn)[continous_columns]
   #QR decompostion of the model matrix
   # qX <- qr.Q(m$qr)
   # rX <- qr.R(m$qr)
@@ -93,11 +93,11 @@ clusters_4lm_help <- function(S, betas_with_intercept, X, y, clust.method, lam){
 
       } else {
         kt <- as.numeric(kt)
-        dod <- min(sp[[kt]][sp[[kt]] != 1])
+
         spold <- sp[[kt]]
         sp[[kt]] <- stats::cutree(models[[kt]], h = heig[i])
         if(length(sp[[kt]][sp[[kt]] != 1]) > 0){
-          sp[[kt]][sp[[kt]] != 1] <- sp[[kt]][sp[[kt]] != 1] + dod - min(sp[[kt]][sp[[kt]] != 1])
+          sp[[kt]][sp[[kt]] != 1] <- sp[[kt]][sp[[kt]] != 1] + min(spold[spold != 1]) - min(sp[[kt]][sp[[kt]] != 1])
         }
         ii <- min(which(spold != sp[[kt]]))
         suma <- ifelse(kt == 1, 0, sum(n.levels[1:(kt-1)] - 1))
