@@ -121,13 +121,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   for (var i = 0; i < sheets.length; i++) {
     if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
     try { var rules = sheets[i].cssRules; } catch (e) { continue; }
-    for (var j = 0; j < rules.length; j++) {
+    var j = 0;
+    while (j < rules.length) {
       var rule = rules[j];
       // check if there is a div.sourceCode rule
-      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -359,13 +366,18 @@ selection algorithm in the package, it can be used both for <span class="math in
 \geq n\)</span> scenarios. It first executes a screening step in order
 to reduce the problem to <span class="math inline">\(p&lt;n\)</span> and
 then uses <code>DMR</code> subsequently.</li>
-<li><code>GLAMER</code> is a model selection algorithm that can be used
-both for <span class="math inline">\(p&lt;n\)</span> and <span class="math inline">\(p \geq n\)</span> scenarios. In comparison to
+<li><code>GLAMER</code> stands for Group LAsso MERger and it is a new
+(simplified in relation to DMRnet) model selection algorithm that can be
+used both for <span class="math inline">\(p&lt;n\)</span> and <span class="math inline">\(p \geq n\)</span> scenarios. In comparison to
 <code>DMRnet</code>, the step of reordering variables based on their
 t-statistics is skipped. This is the first partition selection algorithm
 in literature for which a partition selection consistency has been
 proven for high dimensional scenario [Nowakowski <em>et al.</em>,
 2021].</li>
+<li><code>PDMR</code> stands for Plain DMR and it is a threshold
+parameter agnostic variant of GLAMER algorithm. It can be used both for
+<span class="math inline">\(p&lt;n\)</span> and <span class="math inline">\(p \geq n\)</span> scenarios. [Nowakowski <em>et
+al.</em>, 2022].</li>
 <li><code>DMR</code> [Maj-Kańska <em>et al.</em>, 2015] is a model
 selection algorithm that can be used for <span class="math inline">\(p&lt;n\)</span> scenario only.</li>
 <li><code>SOSnet</code> [Pokarowski and Mielniczuk, 2015, Pokarowski
@@ -378,9 +390,10 @@ partition selection).</li>
 <ul>
 <li>The user can select <code>DMRnet</code> algorithm by calling
 <code>DMRnet()</code> or <code>cv.DMRnet()</code> functions.</li>
-<li>The user can select <code>GLAMER</code> algorithm by calling
-<code>DMRnet()</code> or <code>cv.DMRnet()</code> functions and passing
-<code>algorithm=&quot;glamer&quot;</code> parameter.</li>
+<li>The user can select <code>GLAMER</code> or <code>PDMR</code>
+algorithms by calling <code>DMRnet()</code> or <code>cv.DMRnet()</code>
+functions and passing <code>algorithm=&quot;glamer&quot;</code> or
+<code>algorithm=&quot;PDMR&quot;</code> parameter, respectively.</li>
 <li>The user can select <code>DMR</code> algorithm by calling
 <code>DMR()</code> or <code>cv.DMR()</code> functions.</li>
 <li>The <code>SOSnet</code> algorithm is automatically chosen if
@@ -395,7 +408,7 @@ user works with <code>DMRnet</code> algorithm only.</p>
 <h1>OK, so let’s get started</h1>
 <p>To load the package into memory execute the following line:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DMRnet)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Loaded DMRnet version 0.3.3</span></span></code></pre></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Loaded DMRnet version 0.3.4</span></span></code></pre></div>
 <p><code>DMRnet</code> package features two built-in data sets: <a href="https://archive.ics.uci.edu/ml/datasets/Molecular+Biology+%28Promoter+Gene+Sequences%29">Promoter</a>
 and Miete [Fahrmeir <em>et al.</em>, 2004].</p>
 <p>We will work with Miete data set in this vignette. The Miete data
@@ -572,7 +585,7 @@ with GIC-based model selection. Instead, to perform a 10-fold CV-based
 model selection execute</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>cv.model <span class="ot">&lt;-</span> <span class="fu">cv.DMRnet</span>(X, y)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(cv.model)</span></code></pre></div>
-<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAkAAAAGACAMAAAByRC0tAAAApVBMVEUAAAAAADoAAGYAAP8AOpAAOv8AZrYAZv86AAA6ADo6AGY6AP86OpA6Ov86kNs6kP9mAABmAGZmAP9mOv9mtv+QOgCQOmaQOv+QZgCQkGaQtpCQ2/+2ZgC2Zv+2/7a2///bkDrbkP/b////AAD/ADr/AGb/OgD/Ojr/Omb/OpD/ZgD/Zmb/Zrb/kDr/kLb/kNv/tmb/tv//25D/2////7b//9v///8x5CZ+AAAACXBIWXMAAA7DAAAOwwHHb6hkAAALt0lEQVR4nO3dDUPbxgGHcRNTSpeVuBletuEMBzVZs62rMba+/0ebTvKLAMvS6X93Oh3PL03KMscH5unpJCvSJAcEk6E/AYwbAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBInjgCZIxFABuX06DIWAICEgSAgIklgCsliNISaRBGS1nkdE4gjIco8Q8SAgSAgIkjgCYg00WpEExF7YWMUSEEaKgCAhIEgICBICgoSAICEgSAgIEgKChIAg8RLQZnZT/LqaTCbv7h08HSLmL6Dl5YP56FZ/OkTMW0C7dMqMxKdDxLwFtL4uA1o1bMQIKBHMQJB4CsicH3aV75fT4tMhYr5244uGLu6KHbGGfggoFRwHgoSAIPEd0JK9sLQFnoHsLyuDuLEJg4SAIPEU0LLYSFUHElkDpc1PQMuLu3wzM0cSCShxXgLazm/KXy8fCCh1nt7KqE7iWFw+EFDiPM5AhcUVASXO0xpol81m1nROIgElwtteWLUR284JKG0cB4KEgCAhIEgICBICgoSAICEgSAgIEgKChIAgISBICAgSAoKEgCAhIEgICBICgoSAICEgSAgIEgKChIAgISBICAgSAoKEgCAhIEgICBICgoSAICEgSAgIEgKChIAgISBICAgS+4AO1/ANMy7iZh9Q463g/YyLuPXYhDXdybtuO6/uCtb4UAJKRJ8ZaNISh7lM9G4z13jXXQJKhJdFdG2ZxH3jE+cloNoyqWl7R0CJ6BPQ+rrYgF3cNT+WGejt6LOILtc1+7thnHT4P1kDpa7/caCmuaW0X2k3PoaAEtH/OFCXvXkH4yJunmYgd+Mibn7WQEfcsTBxXvbCzjzLQZ8/jfjwbjwkvBsPiad345fFRqp8GGugxPl5N35ZrJA2s6ucgJLn5d34aiu3nRc7+gSUOK9vpi4uHwgocV4W0YeHLK4IKHF+FtH7bIrNHQGlzdMprfvj1Ns5AaXNzymtDsdF3DgSDQkBQdInoGIjdvmw0N7QIKBE9FlEX9wtLx82M6kgAkpEv+NAyzPHmB2Pi7j1Ow5kAuKUVuTKDLTglFYIa6COp7TK4yJuPffC+p7Saj8u4sZxIEgICBICgoSAICEgSAgIkj5Hoq9Cjou49ZiBFvpRIAJKRr9N2MqckShNRASUiN5roMaznR2Pi7gxA0HS59141kA4YC8MEo4DQdInIHMqWeP1e12Pi7j1OQ5UnooobskIKBFc5hcS4TK/BIRem7DqbOj1NX8vDMEv82s/LuLGbjwkBAQJAUFCQJAQECQEBAkBQUJAkHi6Ur05Sr06dyVXAkqEv4DKW2I2XpWcgBLhLaBdOtw3PnHeAlpflwE1nfRBQIlgBoLEU0D7v/bTeDFgAkqEr934oqGLuzNnThNQIjgOBAkBQeI7IO5YmLjAM9DkwMnTYXBswiAhIEgICBICgsTjkeizt+YloET4mYHar39HQInwtAnbzluu3UFAifC1Blq13E6MgBLBIhoSAoKEgCAhIEgICJIIA+Kt+jGJLyBO9hiV6ALidKFxISBICAiS6AJiDTQu8QXEXtioRBgQxiSagIrfmBo5/4793+e/kZ2/45qXT8d2a6QICJJIApqUPzA+EQXUPsSn2+LntDrV8aNysyk4E0lADc//YtFWBPT0c3XBqo9TAopC1AE9W/Z/mf7wl9sinLKcT/dmBvo0nX7I88fp9Ee3nxy6izmg6bRW0NP7+6f3xxnIbMIefzT/Mr/z+fwZ/PBnNAF9Keaaz88Denpvpp5H85gPbj87dDbmgMy0NL19ZPs1pJgDerYGKjZh+cfnAX0p0vn84en9Xbl7hkFEGdDml/vqTglFP4fbs36ZTn+uAionH/PL5+n0hwcW0QG9Pt4bY0Cb2bv7fP2n4udPd6urvPyQY9WB1V7u44cnTrWJMKDtX/9ZzEDrP5fbKhNQvrh1fprQ9ttj8TN7PP7O+ru7Zx+rk6kcPzx1sl+EAe02YYvyyjBlQMsb5ycqmoDecjItE0zt5T794fGJOo8ofsZtT/cqoGpT5ieg37Pfvj1usuxr8fH6t2/Z/75lf6y/r/+TZf91NEI0TpbSOsGkEZApZ78JcxrQ+mu+zvYz0PrXJ/PP9+LH13zz1c0IA2vZFFmlUn/lx7EGqgIyt/nZzm8Pi2inE9Afef7vQ0Dfq3/Mj3z7rydHYwTSa1Nkl0r9lX/9PYg2oHxZfLI35c58tRt/ei7uZewBtUwwHfM4P8F0fbmjDKjtz6qTkdlWZaMIqNcE0x5Q9wmm/TN0/sCeT9f9+V++Ej1G/z37tdoLK9Y80QX0PBpxrdtQirv5fOQByZPRoFrmFydrXWelNH0Nzh/Y8+l6BfRsMopZp1SOH7lf63ozwoCaDo1GV1L3VM7lMewE02qMAR1fqg4vawj14U5V05pK06Q6/ATTapQB1f5U89R/fES/z7BpvNcfvhhOrKb+bMNPMK08BbSdVy9J4wXrJy//56RfQ6cmo/4ttX3rTs4Ir4YT95AiLaWBn4CW+5vtNt5190RA2stm9592/ZuUZVn9Oc582HGMPqmMq5oaLwFt54dsut43Xn8Brb/Puz+XZfuCbKaP9oCSS+U0LwFtZodTTFcd79bj4GV99u3q3FKWHQqSqnk1dHKpnBbLDOR2kd69JauAuqxa3kQ1Nb7WQLspqOsayJ+WluoBta6BUt4U9eVpL2x/y7mG+SdgQPUxT25ojv2074XhFU8BhX466+FP7oXB3hsNCK74DmjJPVPTFngGmhw4eToMjk0YJIMFhEQMFJDHJ41muMS/PMvhCCj68eIezu69sOMM13hCR4/PQUVAAw5n9fDt/Gw3fT8HFQENOJzdw7fzKw+fg4qABhzO8uGrSZeLhsX9JY9tvLiHYxEd/XhxD0dA0Y8X93AEFP14cQ/Hew+QEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQuA9otb+JQQjVTesCjVle4O8m3HjL/SjBXtJFedUMq+GcB7Qqxl6FKqi8CWKoMbfzYojl5CrUeOavj5ejBHtJV+VlV+yGcx1QdRGqRadTp2Wr6m+HBBpzfW1O5y2+rWHG28xuqpPQg72km5kJyHI41wEdXmXHz3vKanJTXmov5Jjmv82A45mAgg23vPxbEZDlcM4D+snMfU2XUHSuCijkmIt39wHHWxabklDDFeOYNZDlcK4DqjaewRZB5dcZckxzcb9g463KNXug4cymywRkORwB2Y23X0MHGm87v3wINJy5bmoEAaW9CasuLhryazRLriDDlaNEsAkLuqDdBxRslVkdBQr5NRZjhRluubvoge1wo96N3wUUasz9VY7DjFd9I1ehjhqUFsPvxoc9kLibacOMub7eXxw7zHiH72a4l3Qx/IHE2gH4EHab6iBj7iZ5M1CYr3Fhtii7kUO+lWE1HG+mQkJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJARkbVVerHVy0/7It4CArBUBlVdQhUFA1sqAbof+LGJBQFbMlU/+fvGP6+oC1SAgOwtz8fgJM1ANAVmorjq3IKAaArJwuKAeAR0QkIUlAb1CQBaYgV4jIAu7SygTUA0B2TD3PmEv7BkCslIdByKgIwKChIAgISBICAgSAoKEgCAhIEgICBICgoSAICEgSAgIEgKChIAgISBICAgSAoKEgCAhIEgICBICgoSAICEgSAgIkv8DZaXym5m4m+wAAAAASUVORK5CYII=" /><!-- --></p>
 <p>As before, one can access a model dimension with</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>cv.model<span class="sc">$</span>df.min</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 12</span></span></code></pre></div>
@@ -691,9 +704,12 @@ should be used:</p>
 <div id="references" class="section level1">
 <h1>References</h1>
 <ol style="list-style-type: decimal">
+<li>Szymon Nowakowski, Piotr Pokarowski, Wojciech Rejchel and Agnieszka
+Sołtys. 2022. <em>Improving Group Lasso for high-dimensional categorical
+data.</em> arXiv [stat.ME]. <a href="https://doi.org/10.48550/arXiv.2210.14021" class="uri">https://doi.org/10.48550/arXiv.2210.14021</a></li>
 <li>Szymon Nowakowski, Piotr Pokarowski and Wojciech Rejchel. 2021.
 <em>Group Lasso Merger for Sparse Prediction with High-Dimensional
-Categorical Data.</em> arXiv [stat.ME]. <a href="https://arxiv.org/abs/2112.11114" class="uri">https://arxiv.org/abs/2112.11114</a></li>
+Categorical Data.</em> arXiv [stat.ME]. <a href="https://doi.org/10.48550/arXiv.2112.11114" class="uri">https://doi.org/10.48550/arXiv.2112.11114</a></li>
 <li>Aleksandra Maj-Kańska, Piotr Pokarowski and Agnieszka Prochenka,
 2015. <em>Delete or merge regressors for linear model selection.</em>
 Electronic Journal of Statistics 9(2): 1749-1778. <a href="doi:10.1214/15-EJS1050" class="uri">doi:10.1214/15-EJS1050</a></li>
