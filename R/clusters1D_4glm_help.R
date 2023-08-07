@@ -1,4 +1,4 @@
-clusters_4glm_help <- function(S, betas_with_intercept, X, y, clust.method, lam){
+clusters1D_4glm_help <- function(S, betas_with_intercept, X, y, clust.method, lam){
 
   X <- X[, S==1, drop = FALSE]
   betas_with_intercept <- betas_with_intercept[betas_with_intercept>0]
@@ -34,17 +34,21 @@ clusters_4glm_help <- function(S, betas_with_intercept, X, y, clust.method, lam)
   # S <- solve(Kan + diag(rep(2*lam, p)))
   # Var <- S%*%Kan%*%S
   if (n.factors > 0){
-    Wmats <- lapply(1:n.factors, function(i) {
+    points <- lapply(1:n.factors, function(i) {
       i1 <- ifelse(i == 1, 1, sum(n.levels[1:(i - 1)]-1) +1)
       i2 <- sum(n.levels[1:i]-1)
-      out <- glamer_stats(c(0,betas[i1:i2]))   #appending 0 as a beta for the constrained level. Each factor has one level constrained to have beta==0
-      rownames(out) <- colnames(out) <- levels(X[,faki[i]])
+      out <- c(0,betas[i1:i2])   #appending 0 as a beta for the constrained level. Each factor has one level constrained to have beta==0
+      names(out) <- levels(X[,faki[i]])
       return(out)
     })
     #cutting dendrograms
-    models <- lapply(Wmats, function(x) stats::hclust(stats::as.dist(t(x)), method = clust.method, members = NULL))
+    if (clust.method == "variable_selection") {
+      models <- lapply(points, function(x) artificial_clustering(x))
+    } else {
+      models <- lapply(points, function(x) hclust1d::hclust1d(x, method = clust.method))
+    }
     heig <- lapply(1:n.factors, function(x){
-      out <- models[[x]]$height
+      out <- models[[x]]$he
       names(out)<- rep(x, length(out))
       out
     })
@@ -53,11 +57,11 @@ clusters_4glm_help <- function(S, betas_with_intercept, X, y, clust.method, lam)
     heig <- c()
     models <- list()
   }
-  len <- length(heig)
+
   heig <- c(0,heig)
   names(heig)[1] = "full"
   if ((p.fac + 1) < p){
-    heig.add <- betas_with_intercept[(p.fac + 2):p]^2   # heights for continuous columns are just the betas squared
+    heig.add <- betas_with_intercept[(p.fac + 2):p]   # heights for continuous columns are just the betas (NOT squared!)
     names(heig.add) <- colnames(x.full)[(p.fac + 2):p]
     heig <- c(heig, heig.add)
   }
@@ -110,8 +114,8 @@ clusters_4glm_help <- function(S, betas_with_intercept, X, y, clust.method, lam)
           sp[[kt]][sp[[kt]] != 1] <- sp[[kt]][sp[[kt]] != 1] + min(spold[spold != 1]) - min(sp[[kt]][sp[[kt]] != 1])
         }
         Z1[,kt] <- X[, faki[kt]]
-        levels(Z1[,kt]) <- sp[[kt]]
-        Z1[,kt] <- factor(Z1[,kt])
+        levels(Z1[,kt]) <- sp[[kt]]    #overriding levels and possibly concatenating some levels (they become)
+        Z1[,kt] <- factor(Z1[,kt])     #recalculating levels, duplicated levels get removed
         if (kt < length(sp)) for( x in (kt+1):length(sp)){ if (length(sp[[x]][sp[[x]]!=1]) > 0 ) sp[[x]][sp[[x]]!= 1] = sp[[x]][sp[[x]]!=1] - 1}
         nl <- nl - 1
       }

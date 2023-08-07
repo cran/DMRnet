@@ -375,9 +375,18 @@ in literature for which a partition selection consistency has been
 proven for high dimensional scenario [Nowakowski <em>et al.</em>,
 2021].</li>
 <li><code>PDMR</code> stands for Plain DMR and it is a threshold
-parameter agnostic variant of GLAMER algorithm. It can be used both for
-<span class="math inline">\(p&lt;n\)</span> and <span class="math inline">\(p \geq n\)</span> scenarios. [Nowakowski <em>et
-al.</em>, 2022].</li>
+parameter agnostic variant of GLAMER algorithm [Nowakowski <em>et
+al.</em>, 2023]. It can be used both for <span class="math inline">\(p&lt;n\)</span> and <span class="math inline">\(p
+\geq n\)</span> scenarios, as well.</li>
+<li>Variable selection algorithm allows user to select (or deselect)
+full variables, for factors it means that merging their levels is not
+allowed (they are either retained or discarded in full). Internally, it
+is executed as a thresholded group lasso. Initially, a two dimensional
+net of lasso-related lambda and threshold values results in a large
+family of models, but at a later stage of the algorithm, for each model
+dimension the best model (i.e. the model maximizing the likelihood) is
+chosen.<br />
+</li>
 <li><code>DMR</code> [Maj-Kańska <em>et al.</em>, 2015] is a model
 selection algorithm that can be used for <span class="math inline">\(p&lt;n\)</span> scenario only.</li>
 <li><code>SOSnet</code> [Pokarowski and Mielniczuk, 2015, Pokarowski
@@ -390,10 +399,11 @@ partition selection).</li>
 <ul>
 <li>The user can select <code>DMRnet</code> algorithm by calling
 <code>DMRnet()</code> or <code>cv.DMRnet()</code> functions.</li>
-<li>The user can select <code>GLAMER</code> or <code>PDMR</code>
-algorithms by calling <code>DMRnet()</code> or <code>cv.DMRnet()</code>
-functions and passing <code>algorithm=&quot;glamer&quot;</code> or
-<code>algorithm=&quot;PDMR&quot;</code> parameter, respectively.</li>
+<li>The user can select variable selection, <code>GLAMER</code> or
+<code>PDMR</code> algorithms by calling <code>DMRnet()</code> or
+<code>cv.DMRnet()</code> functions and passing
+<code>algorithm=&quot;var_sel&quot;</code>, <code>algorithm=&quot;glamer&quot;</code> or
+<code>algorithm=&quot;PDMR&quot;</code> argument, respectively.</li>
 <li>The user can select <code>DMR</code> algorithm by calling
 <code>DMR()</code> or <code>cv.DMR()</code> functions.</li>
 <li>The <code>SOSnet</code> algorithm is automatically chosen if
@@ -408,7 +418,9 @@ user works with <code>DMRnet</code> algorithm only.</p>
 <h1>OK, so let’s get started</h1>
 <p>To load the package into memory execute the following line:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DMRnet)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Loaded DMRnet version 0.3.4</span></span></code></pre></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Loaded DMRnet version 0.4.0</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; To acknowledge our work please cite DMRnet in publications as:</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Szymon Nowakowski, Piotr Pokarowski, Wojciech Rejchel, Agnieszka Sołtys, 2023. Improving Group Lasso for High-Dimensional Categorical Data. In: Computational Science – ICCS 2023. Lecture Notes in Computer Science, vol 14074, p. 455-470. Springer, Cham. doi:10.1007/978-3-031-36021-3_47</span></span></code></pre></div>
 <p><code>DMRnet</code> package features two built-in data sets: <a href="https://archive.ics.uci.edu/ml/datasets/Molecular+Biology+%28Promoter+Gene+Sequences%29">Promoter</a>
 and Miete [Fahrmeir <em>et al.</em>, 2004].</p>
 <p>We will work with Miete data set in this vignette. The Miete data
@@ -466,47 +478,50 @@ fed into <code>DMRnet</code>:</p>
 <span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $lambda</span></span>
 <span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; NULL</span></span>
 <span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Family of models:  </span></span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       Df       RSS</span></span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [1,] 39  44889691</span></span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [2,] 38  44889694</span></span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [3,] 37  44889702</span></span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [4,] 36  44889714</span></span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [5,] 35  44889736</span></span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [6,] 34  44889761</span></span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [7,] 33  44889800</span></span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [8,] 32  44889868</span></span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [9,] 31  44890015</span></span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [10,] 30  44890219</span></span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [11,] 29  44890407</span></span>
-<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [12,] 28  44890641</span></span>
-<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [13,] 27  44890887</span></span>
-<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [14,] 26  44891333</span></span>
-<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [15,] 25  44892150</span></span>
-<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [16,] 24  44892640</span></span>
-<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [17,] 23  44894059</span></span>
-<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [18,] 22  44898820</span></span>
-<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [19,] 21  44904071</span></span>
-<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [20,] 20  44910418</span></span>
-<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [21,] 19  44921810</span></span>
-<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [22,] 18  44930083</span></span>
-<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [23,] 17  44958900</span></span>
-<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [24,] 16  45063641</span></span>
-<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [25,] 15  45106343</span></span>
-<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [26,] 14  45232724</span></span>
-<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [27,] 13  45290696</span></span>
-<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [28,] 12  45367049</span></span>
-<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [29,] 11  45699667</span></span>
-<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [30,] 10  46235150</span></span>
-<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [31,]  9  46865054</span></span>
-<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [32,]  8  47378415</span></span>
-<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [33,]  7  48034125</span></span>
-<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [34,]  6  49694598</span></span>
-<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [35,]  5  50786340</span></span>
-<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [36,]  4  53188046</span></span>
-<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [37,]  3  56328078</span></span>
-<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [38,]  2  61742060</span></span>
-<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [39,]  1 123608575</span></span></code></pre></div>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $algorithm</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;DMRnet&quot;</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Family of models:  </span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       Df       RSS</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [1,] 39  44889691</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [2,] 38  44889694</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [3,] 37  44889702</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [4,] 36  44889714</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [5,] 35  44889736</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [6,] 34  44889761</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [7,] 33  44889800</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [8,] 32  44889868</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [9,] 31  44890015</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [10,] 30  44890219</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [11,] 29  44890407</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [12,] 28  44890641</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [13,] 27  44890887</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [14,] 26  44891333</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [15,] 25  44892150</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [16,] 24  44892640</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [17,] 23  44894059</span></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [18,] 22  44898820</span></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [19,] 21  44904071</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [20,] 20  44910418</span></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [21,] 19  44921810</span></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [22,] 18  44930083</span></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [23,] 17  44958900</span></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [24,] 16  45063641</span></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [25,] 15  45106343</span></span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [26,] 14  45232724</span></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [27,] 13  45290696</span></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [28,] 12  45367049</span></span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [29,] 11  45699667</span></span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [30,] 10  46235150</span></span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [31,]  9  46865054</span></span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [32,]  8  47378415</span></span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [33,]  7  48034125</span></span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [34,]  6  49694598</span></span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [35,]  5  50786340</span></span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [36,]  4  53188046</span></span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [37,]  3  56328078</span></span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [38,]  2  61742060</span></span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [39,]  1 123608575</span></span></code></pre></div>
 <p>Here, <code>family=&quot;gaussian&quot;</code> argument was used to indicate,
 that we are interested in a linear regression for modeling a continuous
 response variable. The <code>family=&quot;gaussian&quot;</code> is the default and
@@ -551,8 +566,8 @@ behind it is that only non-zero coefficients get listed in the
 <code>DMRnet</code> package. One is based on a <span class="math inline">\(K\)</span>-fold Cross Validation (CV), the other
 is based on Generalized Information Criterion (GIC) [Foster and George,
 1994].</p>
-<div id="model-selection-with-gic" class="section level2">
-<h2>Model selection with GIC</h2>
+<div id="model-selection-with-gic" class="section level3">
+<h3>Model selection with GIC</h3>
 <p>A GIC-based model selection is performed directly on a precomputed
 sequence of models</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>gic.model <span class="ot">&lt;-</span> <span class="fu">gic.DMR</span>(models)</span>
@@ -574,9 +589,9 @@ sequence of models</p>
 <span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     central1         year         size </span></span>
 <span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   -74.219946     1.443990     7.156026</span></span></code></pre></div>
 </div>
-<div id="model-selection-with-k-fold-cross-validation" class="section level2">
-<h2>Model selection with <span class="math inline">\(K\)</span>-fold
-Cross Validation</h2>
+<div id="model-selection-with-k-fold-cross-validation" class="section level3">
+<h3>Model selection with <span class="math inline">\(K\)</span>-fold
+Cross Validation</h3>
 <p>The default <span class="math inline">\(K\)</span> value is 10.
 Because the data needs to be partitioned into CV subsets which alternate
 as training and validating sets, the precomputed sequence of models in
@@ -585,88 +600,117 @@ with GIC-based model selection. Instead, to perform a 10-fold CV-based
 model selection execute</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>cv.model <span class="ot">&lt;-</span> <span class="fu">cv.DMRnet</span>(X, y)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(cv.model)</span></code></pre></div>
-<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAkAAAAGACAMAAAByRC0tAAAApVBMVEUAAAAAADoAAGYAAP8AOpAAOv8AZrYAZv86AAA6ADo6AGY6AP86OpA6Ov86kNs6kP9mAABmAGZmAP9mOv9mtv+QOgCQOmaQOv+QZgCQkGaQtpCQ2/+2ZgC2Zv+2/7a2///bkDrbkP/b////AAD/ADr/AGb/OgD/Ojr/Omb/OpD/ZgD/Zmb/Zrb/kDr/kLb/kNv/tmb/tv//25D/2////7b//9v///8x5CZ+AAAACXBIWXMAAA7DAAAOwwHHb6hkAAALt0lEQVR4nO3dDUPbxgGHcRNTSpeVuBletuEMBzVZs62rMba+/0ebTvKLAMvS6X93Oh3PL03KMscH5unpJCvSJAcEk6E/AYwbAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBInjgCZIxFABuX06DIWAICEgSAgIklgCsliNISaRBGS1nkdE4gjIco8Q8SAgSAgIkjgCYg00WpEExF7YWMUSEEaKgCAhIEgICBICgoSAICEgSAgIEgKChIAg8RLQZnZT/LqaTCbv7h08HSLmL6Dl5YP56FZ/OkTMW0C7dMqMxKdDxLwFtL4uA1o1bMQIKBHMQJB4CsicH3aV75fT4tMhYr5244uGLu6KHbGGfggoFRwHgoSAIPEd0JK9sLQFnoHsLyuDuLEJg4SAIPEU0LLYSFUHElkDpc1PQMuLu3wzM0cSCShxXgLazm/KXy8fCCh1nt7KqE7iWFw+EFDiPM5AhcUVASXO0xpol81m1nROIgElwtteWLUR284JKG0cB4KEgCAhIEgICBICgoSAICEgSAgIEgKChIAgISBICAgSAoKEgCAhIEgICBICgoSAICEgSAgIEgKChIAgISBICAgSAoKEgCAhIEgICBICgoSAICEgSAgIEgKChIAgISBICAgS+4AO1/ANMy7iZh9Q463g/YyLuPXYhDXdybtuO6/uCtb4UAJKRJ8ZaNISh7lM9G4z13jXXQJKhJdFdG2ZxH3jE+cloNoyqWl7R0CJ6BPQ+rrYgF3cNT+WGejt6LOILtc1+7thnHT4P1kDpa7/caCmuaW0X2k3PoaAEtH/OFCXvXkH4yJunmYgd+Mibn7WQEfcsTBxXvbCzjzLQZ8/jfjwbjwkvBsPiad345fFRqp8GGugxPl5N35ZrJA2s6ucgJLn5d34aiu3nRc7+gSUOK9vpi4uHwgocV4W0YeHLK4IKHF+FtH7bIrNHQGlzdMprfvj1Ns5AaXNzymtDsdF3DgSDQkBQdInoGIjdvmw0N7QIKBE9FlEX9wtLx82M6kgAkpEv+NAyzPHmB2Pi7j1Ow5kAuKUVuTKDLTglFYIa6COp7TK4yJuPffC+p7Saj8u4sZxIEgICBICgoSAICEgSAgIkj5Hoq9Cjou49ZiBFvpRIAJKRr9N2MqckShNRASUiN5roMaznR2Pi7gxA0HS59141kA4YC8MEo4DQdInIHMqWeP1e12Pi7j1OQ5UnooobskIKBFc5hcS4TK/BIRem7DqbOj1NX8vDMEv82s/LuLGbjwkBAQJAUFCQJAQECQEBAkBQUJAkHi6Ur05Sr06dyVXAkqEv4DKW2I2XpWcgBLhLaBdOtw3PnHeAlpflwE1nfRBQIlgBoLEU0D7v/bTeDFgAkqEr934oqGLuzNnThNQIjgOBAkBQeI7IO5YmLjAM9DkwMnTYXBswiAhIEgICBICgsTjkeizt+YloET4mYHar39HQInwtAnbzluu3UFAifC1Blq13E6MgBLBIhoSAoKEgCAhIEgICJIIA+Kt+jGJLyBO9hiV6ALidKFxISBICAiS6AJiDTQu8QXEXtioRBgQxiSagIrfmBo5/4793+e/kZ2/45qXT8d2a6QICJJIApqUPzA+EQXUPsSn2+LntDrV8aNysyk4E0lADc//YtFWBPT0c3XBqo9TAopC1AE9W/Z/mf7wl9sinLKcT/dmBvo0nX7I88fp9Ee3nxy6izmg6bRW0NP7+6f3xxnIbMIefzT/Mr/z+fwZ/PBnNAF9Keaaz88Denpvpp5H85gPbj87dDbmgMy0NL19ZPs1pJgDerYGKjZh+cfnAX0p0vn84en9Xbl7hkFEGdDml/vqTglFP4fbs36ZTn+uAionH/PL5+n0hwcW0QG9Pt4bY0Cb2bv7fP2n4udPd6urvPyQY9WB1V7u44cnTrWJMKDtX/9ZzEDrP5fbKhNQvrh1fprQ9ttj8TN7PP7O+ru7Zx+rk6kcPzx1sl+EAe02YYvyyjBlQMsb5ycqmoDecjItE0zt5T794fGJOo8ofsZtT/cqoGpT5ieg37Pfvj1usuxr8fH6t2/Z/75lf6y/r/+TZf91NEI0TpbSOsGkEZApZ78JcxrQ+mu+zvYz0PrXJ/PP9+LH13zz1c0IA2vZFFmlUn/lx7EGqgIyt/nZzm8Pi2inE9Afef7vQ0Dfq3/Mj3z7rydHYwTSa1Nkl0r9lX/9PYg2oHxZfLI35c58tRt/ei7uZewBtUwwHfM4P8F0fbmjDKjtz6qTkdlWZaMIqNcE0x5Q9wmm/TN0/sCeT9f9+V++Ej1G/z37tdoLK9Y80QX0PBpxrdtQirv5fOQByZPRoFrmFydrXWelNH0Nzh/Y8+l6BfRsMopZp1SOH7lf63ozwoCaDo1GV1L3VM7lMewE02qMAR1fqg4vawj14U5V05pK06Q6/ATTapQB1f5U89R/fES/z7BpvNcfvhhOrKb+bMNPMK08BbSdVy9J4wXrJy//56RfQ6cmo/4ttX3rTs4Ir4YT95AiLaWBn4CW+5vtNt5190RA2stm9592/ZuUZVn9Oc582HGMPqmMq5oaLwFt54dsut43Xn8Brb/Puz+XZfuCbKaP9oCSS+U0LwFtZodTTFcd79bj4GV99u3q3FKWHQqSqnk1dHKpnBbLDOR2kd69JauAuqxa3kQ1Nb7WQLspqOsayJ+WluoBta6BUt4U9eVpL2x/y7mG+SdgQPUxT25ojv2074XhFU8BhX466+FP7oXB3hsNCK74DmjJPVPTFngGmhw4eToMjk0YJIMFhEQMFJDHJ41muMS/PMvhCCj68eIezu69sOMM13hCR4/PQUVAAw5n9fDt/Gw3fT8HFQENOJzdw7fzKw+fg4qABhzO8uGrSZeLhsX9JY9tvLiHYxEd/XhxD0dA0Y8X93AEFP14cQ/Hew+QEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQuA9otb+JQQjVTesCjVle4O8m3HjL/SjBXtJFedUMq+GcB7Qqxl6FKqi8CWKoMbfzYojl5CrUeOavj5ejBHtJV+VlV+yGcx1QdRGqRadTp2Wr6m+HBBpzfW1O5y2+rWHG28xuqpPQg72km5kJyHI41wEdXmXHz3vKanJTXmov5Jjmv82A45mAgg23vPxbEZDlcM4D+snMfU2XUHSuCijkmIt39wHHWxabklDDFeOYNZDlcK4DqjaewRZB5dcZckxzcb9g463KNXug4cymywRkORwB2Y23X0MHGm87v3wINJy5bmoEAaW9CasuLhryazRLriDDlaNEsAkLuqDdBxRslVkdBQr5NRZjhRluubvoge1wo96N3wUUasz9VY7DjFd9I1ehjhqUFsPvxoc9kLibacOMub7eXxw7zHiH72a4l3Qx/IHE2gH4EHab6iBj7iZ5M1CYr3Fhtii7kUO+lWE1HG+mQkJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJARkbVVerHVy0/7It4CArBUBlVdQhUFA1sqAbof+LGJBQFbMlU/+fvGP6+oC1SAgOwtz8fgJM1ANAVmorjq3IKAaArJwuKAeAR0QkIUlAb1CQBaYgV4jIAu7SygTUA0B2TD3PmEv7BkCslIdByKgIwKChIAgISBICAgSAoKEgCAhIEgICBICgoSAICEgSAgIEgKChIAgISBICAgSAoKEgCAhIEgICBICgoSAICEgSAgIkv8DZaXym5m4m+wAAAAASUVORK5CYII=" /><!-- --></p>
-<p>As before, one can access a model dimension with</p>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAkAAAAGACAMAAAByRC0tAAAApVBMVEUAAAAAADoAAGYAAP8AOpAAOv8AZrYAZv86AAA6ADo6AGY6AP86OpA6Ov86kNs6kP9mAABmAGZmAP9mOv9mtv+QOgCQOmaQOv+QZgCQkGaQtpCQ2/+2ZgC2Zv+2/7a2///bkDrbkP/b////AAD/ADr/AGb/OgD/Ojr/Omb/OpD/ZgD/Zmb/Zrb/kDr/kLb/kNv/tmb/tv//25D/2////7b//9v///8x5CZ+AAAACXBIWXMAAA7DAAAOwwHHb6hkAAALmUlEQVR4nO3dAVvbxgGHcRNTSpeV0Awv23CGgpqs2ZrWGFvf/6NNJ9lGBMnS3V93Ph3vL03Kk4f4wH5zOsmKNCsAwezUXwCmjYAgISBICAgSAoKEgCAhIEgICBICgoSAICEgSAgIEgKChIAgISBICAgSAoKEgCAhIEgICBICgoSAICEgSAgIEgKChIAgISBICAgSAoKEgCAhIEgICBICgoSAICEgSAgIEgKChIAgISBICAgSAoKEgCAhIEgICBICgoSAICEgSAgIEgKChIAgISBICAgSAoKEgCAhIEgICBICgoSAICEgSAgIEgKChIAgISBICAgSAoKEgCAhIEgICBICgoSAICEgSAgIEgKChIAgISBICAgSAoJk5IBmSMSpAhr34XAqBAQJAUFCQJDEEpDFagwxiSQgq/U8IhJHQJZ7hIgHAUFCQJDEERBroMmKJCD2wqYqloAwUQQECQFBQkCQEBAkBAQJAUFCQJAQECQEBImXgDbXV+Wvq9ls9uZuhIdDxPwFlJ3fm49u9IdDxLwFtEunykh8OETMW0DryyqgVcdGjIASwQwEiaeAzPlhF8V+OS0+HCLmaze+bOjsttwR6+iHgFLBcSBICAgS3wFl7IWlLfAMZH9ZGcSNTRgkBASJp4CyciNVH0hkDZQ2PwFlZ7fF5tocSSSgxHkJaLu4qn49vyeg1Hl6K6M+iWN5fk9AifM4A5WWFwSUOE9roF02m+uucxIJKBHe9sLqjdh2QUBp4zgQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkNgHdLiGb5hxETf7gDpvBd+0XdQ3deq4RisBJcNhE9Z1J++GbH+v1M6bphJQIlxmoFnP7NLcynHb78R5WUQ3tnJd0xUBJcJLQMxAr4dLQOvLcgN2dnvkk/d3OmANlDyXRXQVxaGRVvuFUsf8Q0DJcD8O1LVxGnlcxM39ONCAvfkxxkXcfM9A3HAucZ7WQJ2PcuDwhxEhP3thI46LuPFuPCSe3o3Pyjmq2sSxBkqcn3fjs3IDt7m+KAgoeV7eja8nqe2i3E8joMR5eTd+P0ktz+8JKHF+30xdXhBQ4vwsovfZlLMVAaXN0ymt+8OM2wUBpc3PKa0jjou4eVlEjzku4saRaEgICBKXgMqN2Pn9UvvnhQSUCJdF9Nltdn6/uZYKIqBEuB0Hyo68STHyuIib23EgExCntKJQZqAlJ9VDWAO5ndJqPy7i5rgXximtqHEcCBICgoSAICEgSAgIEgKCxOVI9EXIcRE3hxloqR8FIqBkuG3CVuaMRGkiIqBEOK+BOk+XH3lcxI0ZCBKXd+NZA+GAvTBIOA4EiUtA5lSyzgtAjz0u4uZyHKg6FVHckhFQIrjMLyTCZX4JCE6bsPps6PUl/y4MXOYXInbjISEgSAgIEgKChIAgISBICAgSLwHVF59aHbsQJwElwl9A1R0NOy8qTUCJ8BbQLh3uG584bwGtL6uAut6zJ6BEMANB4img/b/a6LyWKwElwtdufNnQ2e2RE18JKBEcB4KEgCDxHRB3LExc4BlodjDKw+Hk2IRBQkCQEBAkBASJxyPRR++sSkCJ8DMD9V++jIAS4WkTtl30XHqBgBLhaw206rkbFAElgkU0JAQECQFBQkCQEBAkEQbEW/VTEl9AnOwxKdEFxOlC00JAkBAQJNEFxBpoWuILiL2wSYkwIEwJAUESTUDlb8yNgv/H/v/jL+TgV1zz/cOx8JkoAoIkkoBm1Y8+H27Kn/P6VMf3yr2CMJqIAmoZ4rttbhnQ48/1BavezwkoCpEE1P74z1Ztn+Y//O2mDKcq58OdmYE+zOfviuJhPv9x3C8Ow8Uc0HzeKOjx7d3j26cZyGzCHn40/zO/8/H4GfzwZzIBfSrnmo/PA3p8a6aeB/M578b96jDYlAMy09L85oHt1ynFHNCzNVC5CSvePw/oU5nOx3ePb2+r3TOcRNQBPdsL+zSf/1wHVE0+5peP8/kP9yyiTyrKgDa/3NW32ripfq1vz8qhxijFGNDm+s1dsf5L+fOn29VFUX3IaUKRijCg7d//Xc5A679Wix0TULG8Gf1Exe2Xh/Jn/vD0O+uvoz34axJhQLtN2LK6tFAVUHblJSCSsfbyJYg3oHpT5iegb/lvXx42ef65/Hj925f8jy/5n+uv6//l+e8jjTB5jSf76cOW1yDmgEw5+03YqGug9edine9noPWvj+a/r+WPz8Xm80hDTEhfKk8ftv0tjjYgc5+o7eLmsIhu/z7dfPuzKP57COhr/Z/5UWz/8yg9ctSaT9vwVNo/fHqgwaO7f+GDHu7FDJSVX+pVYze+8anqZJR8QL3bH4tUphhQzx9tfhtOKZltVZ5GQG7bH9dqprIG6vmjx7+jIb7lv9Z7YeWaZyoBOaVyLIShqXw3c33/ZQ3++od+ouPDOQXUNqdOXvMbUlPpD2hAKkef4QkG1LNbMCF9k4qeSkcpTql0fA+jf6Ljw9k8/vO/MtJyKJC+VI5MDloqHaWM92RNMqDGn+p/qgJzSuVYCGIqvp8KTwFtF/V32XnB+pECap+MgrTU/iK5pdIfUASptPMTULa/2W7nXXdf7AzOxEmu/6+o3TPc2UdzvPYPY1yqeOMloO3ikM3A+8YP+3dhx1i/Moc/med58eK3j/RxZLh4lyreeAloc304xXQ18G49+jNl8So+e73y/FCQWwj9AUW7/RlBJDPQGE9g2/TR/5Ln+aEgx2qaj5ZyKu18rYF2U9DQNZC4AHrxYINbcg2oq5SEU2nnaS9sf8u5jvln5F6O6WmpI6DeNdDrK6WDp4BCP9ywMVv3blrXQP17Yai9poCaw/fthWEg3wFl3DM1bYFnoNnBKA+Hk3ulmzCMhYAgOVlASMSJAvL4oNEMl/i3Zzmc3XthT4F2ntDh8DWoCOiEw1l9+nZxtBvXr0FFQCcczu7Tt4sLD1+DioBOOJzlp69mQy4aFve3PLXx4h6ORXT048U9HAFFP17cwxFQ9OPFPRwBRT9e3MPx3gMkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAk4we0enkTA3/q+20EGrO6QuRVuPGy/SjBntJlddkVq+FGD2hVjr0KVVB1E8RQY24X5RDZ7CLUeOb6A9UowZ7SVXXdHrvhxg6ovorZctC597JV/c+LAo25vjTng5cva5jxNtdX9b9iCPaUbq5NQJbDjR3Q4Vke+XHbrGZX1bUaQ45p/m4GHM8EFGy47PwfZUCWw40e0E9m7uu6Bufo6oBCjrl8cxdwvKzclIQarhzHrIEshxs7oHrjGWwRVH2fIcc0V4cMNt6qWrMHGs5sukxAlsMRkN14+zV0oPG2i/P7QMOZC+9GEFDam7D66rQhv0ez5AoyXDVKBJuwoAvafUDBVpn1UaCQ32M5Vpjhst1VM2yHm/Ru/C6gUGPuL5MdZrz6hVyFOmpQWZ5+Nz7sgcTdTBtmzPXl/urqYcY7vJrhntLl6Q8kNg7Ah7DbVAcZczfJm4HCfI9Ls0XZjRzyrQyr4XgzFRICgoSAICEgSAgIEgKChIAgISBICAgSAoKEgCAhIEgICBICgoSAICEgSAgIEgKChIAgISBICAgSAoKEgCAhIEgICBICgoSAICEga6vqYq2zq/7PfA0IyFoZUHUFVRgEZK0K6ObUX0UsCMiKufLJP8/+dVlfoBoEZGdpLh4/YwZqICAL9VXnlgTUQEAWDhfUI6ADArKQEdALBGSBGeglArKwu4QyATUQkA1z7xP2wp4hICv1cSACekJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQfJ/QOjyc8l761wAAAAASUVORK5CYII=" /><!-- --></p>
+<p>As before, one can access the best model dimension with</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>cv.model<span class="sc">$</span>df.min</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 12</span></span></code></pre></div>
-<p>Well, the dimension is the same as when we used GIC directly. Let’s
-check if the CV-selected model is the same as the best model selected
-with GIC:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(cv.model)<span class="sc">==</span><span class="fu">coef</span>(gic.model)</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)  bathextra1      tiles1       area7      area10      area11 </span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        TRUE        TRUE        TRUE        TRUE        TRUE        TRUE </span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      area14      area15      area16      area17      area19      area20 </span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        TRUE        TRUE        TRUE        TRUE        TRUE        TRUE </span></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      area21      area22      area23      area24      area25    kitchen1 </span></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        TRUE        TRUE        TRUE        TRUE        TRUE        TRUE </span></span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      rooms4      rooms5      rooms6       best1       good1       warm1 </span></span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        TRUE        TRUE        TRUE        TRUE        TRUE        TRUE </span></span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    central1        year        size </span></span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        TRUE        TRUE        TRUE</span></span></code></pre></div>
+<p>In a plot above there is also a blue dot indicating a
+<code>df.1se</code> model. This is the smallest model (respective to its
+dimension) having its error within the boundary of one standard
+deviation (the blue dotted line) from the best model. This model
+improves interpretability without erring much more than the best
+model.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>cv.model<span class="sc">$</span>df<span class="fl">.1</span>se</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 3</span></span></code></pre></div>
+<p>Returning to the best model, <code>df.min</code>, its dimension is
+the same as when we used GIC directly. Let’s check if the CV-selected
+model is the same as the best model selected with GIC:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(cv.model)<span class="sc">==</span><span class="fu">coef</span>(gic.model)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)  bathextra1      tiles1       area7      area10      area11 </span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        TRUE        TRUE        TRUE        TRUE        TRUE        TRUE </span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      area14      area15      area16      area17      area19      area20 </span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        TRUE        TRUE        TRUE        TRUE        TRUE        TRUE </span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      area21      area22      area23      area24      area25    kitchen1 </span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        TRUE        TRUE        TRUE        TRUE        TRUE        TRUE </span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      rooms4      rooms5      rooms6       best1       good1       warm1 </span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        TRUE        TRUE        TRUE        TRUE        TRUE        TRUE </span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    central1        year        size </span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        TRUE        TRUE        TRUE</span></span></code></pre></div>
 </div>
 </div>
 <div id="predicting-response-for-new-observations" class="section level1">
 <h1>Predicting response for new observations</h1>
 <p>Models selected with both model selection methods can be used to
 predict response variable values for new observations:</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(gic.model, <span class="at">newx=</span><span class="fu">head</span>(X))</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       [,1]</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 559.2277</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 648.9469</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 523.4476</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 596.1306</span></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 970.6029</span></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 602.8470</span></span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(cv.model, <span class="at">newx=</span><span class="fu">head</span>(X))</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       [,1]</span></span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 559.2277</span></span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 648.9469</span></span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 523.4476</span></span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 596.1306</span></span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 970.6029</span></span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 602.8470</span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(gic.model, <span class="at">newx=</span><span class="fu">head</span>(X))</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       [,1]</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 559.2277</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 648.9469</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 523.4476</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 596.1306</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 970.6029</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 602.8470</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(cv.model, <span class="at">newx=</span><span class="fu">head</span>(X))</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       [,1]</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 559.2277</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 648.9469</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 523.4476</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 596.1306</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 970.6029</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 602.8470</span></span></code></pre></div>
 <p>No wonder the corresponding predictions are all equal, since the
 selected models were the same.</p>
+<p>In models selected with CV, one can switch between
+<code>df.min</code> and <code>df.1se</code> models with the use of
+<code>md</code> argument, as follows:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(cv.model, <span class="at">md=</span><span class="st">&quot;df.min&quot;</span>, <span class="at">newx=</span><span class="fu">head</span>(X))  <span class="co"># the default, best model</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       [,1]</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 559.2277</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 648.9469</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 523.4476</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 596.1306</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 970.6029</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 602.8470</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(cv.model, <span class="at">md=</span><span class="st">&quot;df.1se&quot;</span>,  <span class="at">newx=</span><span class="fu">head</span>(X)) <span class="co"># the alternative df.1se model</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       [,1]</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 568.6685</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 547.5318</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 533.4407</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 547.5318</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 794.1263</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 660.2607</span></span></code></pre></div>
 <p>One can predict the response variable values for the whole sequence
 of models as well:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(models, <span class="at">newx=</span><span class="fu">head</span>(X))</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       df39     df38     df37     df36     df35     df34     df33     df32</span></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 570.1916 570.1880 570.1944 570.2044 570.2462 570.2468 570.2519 570.2554</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 663.6774 663.6772 663.7068 663.7338 663.7017 663.7233 663.7777 663.8257</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 519.4320 519.4302 519.4352 519.4451 519.4860 519.4831 519.4827 519.4941</span></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 568.8714 568.8747 568.8634 568.8770 568.8583 568.8622 568.8667 568.8647</span></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 948.5308 948.5381 948.5760 948.6384 948.6232 948.6464 948.6823 948.7183</span></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 583.6860 583.6893 583.6874 583.6696 583.6517 583.6554 583.6507 583.6619</span></span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       df31     df30     df29     df28     df27     df26     df25     df24</span></span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 570.2455 570.2503 569.4073 569.4309 569.4629 569.4797 569.5341 569.1385</span></span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 663.8759 663.8688 662.9924 662.9661 662.9836 662.9517 662.8686 662.3913</span></span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 519.4867 519.5139 518.6397 518.6799 518.6922 518.7602 518.7982 518.4336</span></span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 568.8863 568.8725 568.8900 568.8979 568.2476 568.2456 568.1406 568.1838</span></span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 948.7620 948.6792 948.5951 948.6107 947.9537 947.8719 947.6397 947.5754</span></span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 583.6725 583.6609 583.6405 583.6242 583.0231 583.0253 583.0193 582.9143</span></span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       df23     df22     df21     df20     df19     df18     df17     df16</span></span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 569.0645 569.1271 569.4311 570.5289 570.8667 570.3454 570.3404 562.3298</span></span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 662.3284 662.6799 662.7128 663.9165 663.8429 663.4175 663.1364 652.6998</span></span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 518.4404 518.3905 518.6901 519.9875 520.3221 520.7543 521.0591 512.5275</span></span>
-<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 568.1961 568.3222 568.1244 569.0227 568.8951 569.5745 581.6448 580.8725</span></span>
-<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 947.3725 948.2670 948.6530 948.6425 949.1207 947.5811 959.4972 960.5421</span></span>
-<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 582.8929 582.9015 582.6029 583.3883 583.1541 581.7241 594.4963 592.5491</span></span>
-<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       df15     df14     df13     df12     df11     df10      df9      df8</span></span>
-<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 556.3796 557.3476 557.1075 559.2277 553.6168 555.5438 537.3356 528.6948</span></span>
-<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 647.3305 647.7989 647.2196 648.9469 645.3276 644.7009 626.9365 622.1707</span></span>
-<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 520.5629 521.4951 521.4796 523.4476 519.7666 520.7916 502.3516 493.5944</span></span>
-<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 587.4935 597.0187 597.1792 596.1306 587.3871 532.7196 538.8990 531.8596</span></span>
-<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 961.7100 972.8877 970.1441 970.6029 997.1003 948.1311 919.9631 915.9963</span></span>
-<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 595.7414 604.5666 602.7236 602.8470 634.4291 639.6409 646.5391 639.7183</span></span>
-<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        df7      df6      df5      df4      df3      df2     df1</span></span>
-<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 528.5285 533.6460 526.5034 557.4039 568.6685 559.0850 570.093</span></span>
-<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 621.0150 623.7535 650.1912 536.6915 547.5318 538.3833 570.093</span></span>
-<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 493.3071 498.1606 490.2621 522.8832 533.4407 524.5822 570.093</span></span>
-<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 527.6910 551.1119 552.7880 536.6915 547.5318 538.3833 570.093</span></span>
-<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 917.8128 997.3743 829.1419 929.4490 794.1263 779.9030 570.093</span></span>
-<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 635.9730 660.3250 663.0939 647.1579 660.2607 648.7923 570.093</span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(models, <span class="at">newx=</span><span class="fu">head</span>(X))</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       df39     df38     df37     df36     df35     df34     df33     df32</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 570.1916 570.1880 570.1944 570.2044 570.2462 570.2468 570.2519 570.2554</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 663.6774 663.6772 663.7068 663.7338 663.7017 663.7233 663.7777 663.8257</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 519.4320 519.4302 519.4352 519.4451 519.4860 519.4831 519.4827 519.4941</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 568.8714 568.8747 568.8634 568.8770 568.8583 568.8622 568.8667 568.8647</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 948.5308 948.5381 948.5760 948.6384 948.6232 948.6464 948.6823 948.7183</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 583.6860 583.6893 583.6874 583.6696 583.6517 583.6554 583.6507 583.6619</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       df31     df30     df29     df28     df27     df26     df25     df24</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 570.2455 570.2503 569.4073 569.4309 569.4629 569.4797 569.5341 569.1385</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 663.8759 663.8688 662.9924 662.9661 662.9836 662.9517 662.8686 662.3913</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 519.4867 519.5139 518.6397 518.6799 518.6922 518.7602 518.7982 518.4336</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 568.8863 568.8725 568.8900 568.8979 568.2476 568.2456 568.1406 568.1838</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 948.7620 948.6792 948.5951 948.6107 947.9537 947.8719 947.6397 947.5754</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 583.6725 583.6609 583.6405 583.6242 583.0231 583.0253 583.0193 582.9143</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       df23     df22     df21     df20     df19     df18     df17     df16</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 569.0645 569.1271 569.4311 570.5289 570.8667 570.3454 570.3404 562.3298</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 662.3284 662.6799 662.7128 663.9165 663.8429 663.4175 663.1364 652.6998</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 518.4404 518.3905 518.6901 519.9875 520.3221 520.7543 521.0591 512.5275</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 568.1961 568.3222 568.1244 569.0227 568.8951 569.5745 581.6448 580.8725</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 947.3725 948.2670 948.6530 948.6425 949.1207 947.5811 959.4972 960.5421</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 582.8929 582.9015 582.6029 583.3883 583.1541 581.7241 594.4963 592.5491</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       df15     df14     df13     df12     df11     df10      df9      df8</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 556.3796 557.3476 557.1075 559.2277 553.6168 555.5438 537.3356 528.6948</span></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 647.3305 647.7989 647.2196 648.9469 645.3276 644.7009 626.9365 622.1707</span></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 520.5629 521.4951 521.4796 523.4476 519.7666 520.7916 502.3516 493.5944</span></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 587.4935 597.0187 597.1792 596.1306 587.3871 532.7196 538.8990 531.8596</span></span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 961.7100 972.8877 970.1441 970.6029 997.1003 948.1311 919.9631 915.9963</span></span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 595.7414 604.5666 602.7236 602.8470 634.4291 639.6409 646.5391 639.7183</span></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        df7      df6      df5      df4      df3      df2     df1</span></span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 528.5285 533.6460 526.5034 557.4039 568.6685 559.0850 570.093</span></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 621.0150 623.7535 650.1912 536.6915 547.5318 538.3833 570.093</span></span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 493.3071 498.1606 490.2621 522.8832 533.4407 524.5822 570.093</span></span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 527.6910 551.1119 552.7880 536.6915 547.5318 538.3833 570.093</span></span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 917.8128 997.3743 829.1419 929.4490 794.1263 779.9030 570.093</span></span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 635.9730 660.3250 663.0939 647.1579 660.2607 648.7923 570.093</span></span></code></pre></div>
 <p>Notice how the <code>df12</code> model predictions overlap with the
-values we obtained above.</p>
+values we obtained for the <code>df.min</code> model, and
+<code>df3</code> overlaps with the values we obtained for the
+<code>df.1se</code> model.</p>
 </div>
 <div id="classification-with-2-classes" class="section level1">
 <h1>Classification with 2 classes</h1>
@@ -677,11 +721,11 @@ values we obtained above.</p>
 two classes, with the last level in alphabetical order interpreted as
 the target class. It is illustrated with the following code with a
 somewhat artificial example:</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>binomial_y <span class="ot">&lt;-</span> <span class="fu">factor</span>(y <span class="sc">&gt;</span> <span class="fu">mean</span>(y))     <span class="co">#changing Miete response var y into a binomial factor with 2 classes</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>binomial_models <span class="ot">&lt;-</span> <span class="fu">DMRnet</span>(X, binomial_y, <span class="at">family=</span><span class="st">&quot;binomial&quot;</span>)</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>gic.binomial_model <span class="ot">&lt;-</span> <span class="fu">gic.DMR</span>(binomial_models)</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>gic.binomial_model<span class="sc">$</span>df.min</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 12</span></span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>binomial_y <span class="ot">&lt;-</span> <span class="fu">factor</span>(y <span class="sc">&gt;</span> <span class="fu">mean</span>(y))     <span class="co">#changing Miete response var y into a binomial factor with 2 classes</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>binomial_models <span class="ot">&lt;-</span> <span class="fu">DMRnet</span>(X, binomial_y, <span class="at">family=</span><span class="st">&quot;binomial&quot;</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>gic.binomial_model <span class="ot">&lt;-</span> <span class="fu">gic.DMR</span>(binomial_models)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>gic.binomial_model<span class="sc">$</span>df.min</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 12</span></span></code></pre></div>
 <p>A corresponding <code>predict</code> call has a <code>type</code>
 parameter with the default value <code>&quot;link&quot;</code>, which returns the
 linear predictors. To change that behavior one can substitute the
@@ -690,14 +734,14 @@ probabilities or <code>type=&quot;class&quot;</code> to get the class labels
 corresponding to the maximum probability. So to get actual values
 compatible with a binomial <code>y</code>, <code>type=&quot;class&quot;</code>
 should be used:</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(gic.binomial_model, <span class="at">newx=</span><span class="fu">head</span>(X), <span class="at">type=</span><span class="st">&quot;class&quot;</span>)</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   [,1]</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1    0</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2    1</span></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3    0</span></span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4    1</span></span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5    1</span></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6    1</span></span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(gic.binomial_model, <span class="at">newx=</span><span class="fu">head</span>(X), <span class="at">type=</span><span class="st">&quot;class&quot;</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   [,1]</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1    0</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2    1</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3    0</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4    1</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5    1</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6    1</span></span></code></pre></div>
 <p>Please note that 1 is the value of a target class in the
 <code>predict</code> output.</p>
 </div>
@@ -705,8 +749,9 @@ should be used:</p>
 <h1>References</h1>
 <ol style="list-style-type: decimal">
 <li>Szymon Nowakowski, Piotr Pokarowski, Wojciech Rejchel and Agnieszka
-Sołtys. 2022. <em>Improving Group Lasso for high-dimensional categorical
-data.</em> arXiv [stat.ME]. <a href="https://doi.org/10.48550/arXiv.2210.14021" class="uri">https://doi.org/10.48550/arXiv.2210.14021</a></li>
+Sołtys, 2023. <em>Improving Group Lasso for High-Dimensional Categorical
+Data</em>. In: Computational Science – ICCS 2023. Lecture Notes in
+Computer Science, vol 14074, p. 455-470. Springer, Cham. <a href="doi:10.1007/978-3-031-36021-3_47" class="uri">doi:10.1007/978-3-031-36021-3_47</a></li>
 <li>Szymon Nowakowski, Piotr Pokarowski and Wojciech Rejchel. 2021.
 <em>Group Lasso Merger for Sparse Prediction with High-Dimensional
 Categorical Data.</em> arXiv [stat.ME]. <a href="https://doi.org/10.48550/arXiv.2112.11114" class="uri">https://doi.org/10.48550/arXiv.2112.11114</a></li>

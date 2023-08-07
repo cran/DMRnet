@@ -41,12 +41,19 @@ plot(cv.model)
 ## ----cv.df.min----------------------------------------------------------------
 cv.model$df.min
 
+## ----cv.df.1se----------------------------------------------------------------
+cv.model$df.1se
+
 ## ----cv.coef------------------------------------------------------------------
 coef(cv.model)==coef(gic.model)
 
 ## ----predict------------------------------------------------------------------
 predict(gic.model, newx=head(X))
 predict(cv.model, newx=head(X))
+
+## ----cv predict---------------------------------------------------------------
+predict(cv.model, md="df.min", newx=head(X))  # the default, best model
+predict(cv.model, md="df.1se",  newx=head(X)) # the alternative df.1se model
 
 ## ----seq-predict--------------------------------------------------------------
 predict(models, newx=head(X))

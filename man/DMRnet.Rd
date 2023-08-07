@@ -8,14 +8,14 @@ DMRnet(
   X,
   y,
   family = "gaussian",
-  clust.method = "complete",
   o = 5,
   nlambda = 100,
   lam = 10^(-7),
   interc = TRUE,
   maxp = ifelse(family == "gaussian", ceiling(length(y)/2), ceiling(length(y)/4)),
   lambda = NULL,
-  algorithm = "DMRnet"
+  algorithm = "DMRnet",
+  clust.method = ifelse(algorithm == "glamer", "single", "complete")
 )
 }
 \arguments{
@@ -24,8 +24,6 @@ DMRnet(
 \item{y}{Response variable; Numerical for \code{family="gaussian"} or a factor with two levels for \code{family="binomial"}. For \code{family="binomial"} the last level in alphabetical order is the target class.}
 
 \item{family}{Response type; one of: \code{"gaussian"}, \code{"binomial"}.}
-
-\item{clust.method}{Clustering method used for partitioning levels of factors; see function \href{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/hclust.html}{hclust} in package \pkg{stats} for details. \code{clust.method="complete"} is the default.}
 
 \item{o}{Parameter of the group lasso screening step, described in Details, the default value is 5.}
 
@@ -39,7 +37,9 @@ DMRnet(
 
 \item{lambda}{Explicitly provided net of lambda values for the group lasso screening step, described in Details. If provided, it overrides the value of \code{nlambda} parameter.}
 
-\item{algorithm}{The algorithm to be used to merge levels; one of: \code{"DMRnet"} (the default), \code{"glamer"}, \code{"PDMR"}.}
+\item{algorithm}{The algorithm to be used; for partition selection (merging levels) use one of: \code{"DMRnet"} (the default), \code{"glamer"} or \code{"PDMR"}. Alternatively, use \code{"var_sel"} for variable (group) selection with no partition selection.}
+
+\item{clust.method}{Clustering method used for partitioning levels of factors; see function \href{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/hclust.html}{hclust} in package \pkg{stats} for details. \code{clust.method="complete"} is the default for all algorithms except \code{algorithm="glamer"}, for which \code{clust.method="single"} is the default.}
 }
 \value{
 An object with S3 class \code{"DMR"}, which  is  a  list  with  the  ingredients:
