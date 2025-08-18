@@ -2,7 +2,7 @@ Package: DMRnet
 Type: Package
 Title: Delete or Merge Regressors Algorithms for Linear and Logistic
         Model Selection and High-Dimensional Data
-Version: 0.4.0
+Version: 0.4.1
 Authors@R: c(person("Agnieszka", "Prochenka-Sołtys", email = "ap220756@mimuw.edu.pl", role = c("aut"), comment = "previous maintainer for versions <= 0.2.0"),
    person("Piotr", "Pokarowski", role = c("aut")),
    person("Szymon", "Nowakowski", email = "s.nowakowski@mimuw.edu.pl", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-1939-9512")))
@@ -11,17 +11,18 @@ License: GPL-2
 Encoding: UTF-8
 LazyData: true
 Imports: hclust1d, glmnet, grpreg, stats, graphics, utils
-Suggests: knitr
+Suggests: rmarkdown, knitr
 URL: https://github.com/SzymonNowakowski/DMRnet
 BugReports: https://github.com/SzymonNowakowski/DMRnet/issues
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2023-08-02 12:36:36 UTC; Szym
+Packaged: 2025-08-18 11:41:58 UTC; szymon
 Author: Agnieszka Prochenka-Sołtys [aut] (previous maintainer for versions <=
     0.2.0),
   Piotr Pokarowski [aut],
-  Szymon Nowakowski [aut, cre] (<https://orcid.org/0000-0002-1939-9512>)
+  Szymon Nowakowski [aut, cre] (ORCID:
+    <https://orcid.org/0000-0002-1939-9512>)
 Maintainer: Szymon Nowakowski <s.nowakowski@mimuw.edu.pl>
 Repository: CRAN
-Date/Publication: 2023-08-07 14:40:09 UTC
+Date/Publication: 2025-08-18 12:00:35 UTC
